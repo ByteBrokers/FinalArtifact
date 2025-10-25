@@ -15,11 +15,13 @@ interface GameUIProps {
 
 const GameUI = ({ gameState, onLogout, onEditCharacter, onOpenDashboard, onOpenWithdraw, onGoHome, onUpdateInfo }: GameUIProps) => {
   const [balanceExpanded, setBalanceExpanded] = useState(false);
+  const [controlsExpanded, setControlsExpanded] = useState(false);
+
 
   return (
     <>
       <div className="absolute top-4 left-4 bg-card/95 backdrop-blur-xl border border-border shadow-xl rounded-2xl p-4 min-w-[200px] z-50">
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-lg">
             💰
           </div>
@@ -37,8 +39,8 @@ const GameUI = ({ gameState, onLogout, onEditCharacter, onOpenDashboard, onOpenW
         </div>
         
         {balanceExpanded && (
-          <>
-            <div className="flex items-center justify-between text-xs mb-3 pb-3 border-b border-border">
+          <div className="mt-3 pt-3 border-t border-border">
+            <div className="flex items-center justify-between text-xs mb-3">
               <div className="text-center">
                 <div className="text-muted-foreground mb-1">Level</div>
                 <div className="text-sm font-semibold text-foreground">{gameState.level}</div>
@@ -106,26 +108,38 @@ const GameUI = ({ gameState, onLogout, onEditCharacter, onOpenDashboard, onOpenW
                 <span className="text-[10px]">Logout</span>
               </Button>
             </div>
-          </>
+          </div>
         )}
       </div>
 
-      <div className="absolute bottom-4 left-4 bg-card/95 backdrop-blur-xl border border-border shadow-xl rounded-xl p-3 max-w-[220px]">
-        <div className="text-xs font-semibold text-foreground mb-2">Controls</div>
-        <div className="space-y-1.5 text-xs text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] bg-muted px-1.5 py-0.5 rounded">WASD/↑↓←→</span>
-            <span>Move</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] bg-muted px-1.5 py-0.5 rounded">🖱️</span>
-            <span>Hold + drag to rotate camera</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] bg-muted px-1.5 py-0.5 rounded">💼</span>
-            <span>Approach buildings</span>
-          </div>
+      <div className="absolute bottom-4 left-4 bg-card/95 backdrop-blur-xl border border-border shadow-xl rounded-xl p-3 max-w-[220px] z-50">
+        <div className="flex items-center justify-between">
+          <div className="text-xs font-semibold text-foreground">Controls</div>
+          <button
+            onClick={() => setControlsExpanded(!controlsExpanded)}
+            className="p-1 hover:bg-muted rounded transition-colors"
+            aria-label="Toggle controls"
+          >
+            {controlsExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </button>
         </div>
+        
+        {controlsExpanded && (
+          <div className="space-y-1.5 text-xs text-muted-foreground mt-2 pt-2 border-t border-border">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[10px] bg-muted px-1.5 py-0.5 rounded">WASD/↑↓←→</span>
+              <span>Move</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[10px] bg-muted px-1.5 py-0.5 rounded">🖱️</span>
+              <span>Hold + drag to rotate camera</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[10px] bg-muted px-1.5 py-0.5 rounded">💼</span>
+              <span>Approach buildings</span>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

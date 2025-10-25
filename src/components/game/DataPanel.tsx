@@ -11,7 +11,7 @@ const DataPanel = ({ dataTypes }: DataPanelProps) => {
 
   return (
     <div className="absolute top-6 right-6 bg-card/90 backdrop-blur-xl border border-border shadow-xl rounded-xl p-5 min-w-[260px] z-50">
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2">
         <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center text-lg">
           📊
         </div>
@@ -26,7 +26,7 @@ const DataPanel = ({ dataTypes }: DataPanelProps) => {
       </div>
       
       {inventoryExpanded && (
-        <div className="space-y-2">
+        <div className="space-y-2 mt-4 pt-4 border-t border-border">
           {Object.entries(dataTypes).map(([type, data]) => (
             <div
               key={type}
