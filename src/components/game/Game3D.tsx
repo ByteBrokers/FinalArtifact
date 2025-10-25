@@ -621,11 +621,9 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       canvas.width = 128;
       canvas.height = 128;
       const ctx = canvas.getContext('2d')!;
-      // Base background
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, 128, 128);
-      // Colored stripes
       ctx.fillStyle = charData.body_color;
+      ctx.fillRect(0, 0, 128, 128);
+      ctx.fillStyle = '#ffffff';
       for (let i = 0; i < 128; i += 16) {
         ctx.fillRect(i, 0, 8, 128);
       }
@@ -636,11 +634,9 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       canvas.width = 128;
       canvas.height = 128;
       const ctx = canvas.getContext('2d')!;
-      // Base background
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, 128, 128);
-      // Colored dots
       ctx.fillStyle = charData.body_color;
+      ctx.fillRect(0, 0, 128, 128);
+      ctx.fillStyle = '#ffffff';
       for (let x = 16; x < 128; x += 32) {
         for (let y = 16; y < 128; y += 32) {
           ctx.beginPath();
