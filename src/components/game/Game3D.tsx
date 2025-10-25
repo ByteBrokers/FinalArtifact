@@ -92,6 +92,8 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
   const npcsRef = useRef<Array<{ mesh: THREE.Group; speed: number; direction: THREE.Vector3; nextTurn: number }>>([]);
   const keysRef = useRef<Record<string, boolean>>({});
   const animationIdRef = useRef<number>();
+  const cameraRotationRef = useRef({ yaw: 0, pitch: 0 });
+  const isPointerLockedRef = useRef(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -107,8 +109,35 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       keysRef.current[e.code] = false;
     };
 
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isPointerLockedRef.current) return;
+
+      const sensitivity = 0.002;
+      cameraRotationRef.current.yaw -= e.movementX * sensitivity;
+      cameraRotationRef.current.pitch -= e.movementY * sensitivity;
+
+      // Limit pitch to prevent camera flipping
+      cameraRotationRef.current.pitch = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, cameraRotationRef.current.pitch));
+    };
+
+    const handleClick = () => {
+      if (rendererRef.current?.domElement) {
+        rendererRef.current.domElement.requestPointerLock();
+      }
+    };
+
+    const handlePointerLockChange = () => {
+      isPointerLockedRef.current = document.pointerLockElement === rendererRef.current?.domElement;
+    };
+
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("keyup", handleKeyUp);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("pointerlockchange", handlePointerLockChange);
+    
+    if (rendererRef.current?.domElement) {
+      rendererRef.current.domElement.addEventListener("click", handleClick);
+    }
 
     return () => {
       if (animationIdRef.current) {
@@ -116,6 +145,11 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       }
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("keyup", handleKeyUp);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("pointerlockchange", handlePointerLockChange);
+      if (rendererRef.current?.domElement) {
+        rendererRef.current.domElement.removeEventListener("click", handleClick);
+      }
       if (rendererRef.current && containerRef.current) {
         containerRef.current.removeChild(rendererRef.current.domElement);
         rendererRef.current.dispose();
@@ -898,35 +932,49 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
 
     if (playerRef.current && cameraRef.current) {
       const speed = 0.5;
-      if (keysRef.current["ArrowUp"]) {
-        playerRef.current.position.z -= speed;
+      
+      // Calculate forward and right directions based on camera yaw
+      const yaw = cameraRotationRef.current.yaw;
+      const forward = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw));
+      const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
+
+      // Move in camera direction
+      if (keysRef.current["ArrowUp"] || keysRef.current["KeyW"]) {
+        playerRef.current.position.add(forward.clone().multiplyScalar(speed));
       }
-      if (keysRef.current["ArrowDown"]) {
-        playerRef.current.position.z += speed;
+      if (keysRef.current["ArrowDown"] || keysRef.current["KeyS"]) {
+        playerRef.current.position.add(forward.clone().multiplyScalar(-speed));
       }
-      if (keysRef.current["ArrowLeft"]) {
-        playerRef.current.position.x -= speed;
+      if (keysRef.current["ArrowLeft"] || keysRef.current["KeyA"]) {
+        playerRef.current.position.add(right.clone().multiplyScalar(-speed));
       }
-      if (keysRef.current["ArrowRight"]) {
-        playerRef.current.position.x += speed;
+      if (keysRef.current["ArrowRight"] || keysRef.current["KeyD"]) {
+        playerRef.current.position.add(right.clone().multiplyScalar(speed));
       }
 
       // Boundary collision - keep player inside the wooden fence
-      const boundaryLimit = 73; // Slightly inside the fence at 75
+      const boundaryLimit = 73;
       playerRef.current.position.x = Math.max(-boundaryLimit, Math.min(boundaryLimit, playerRef.current.position.x));
       playerRef.current.position.z = Math.max(-boundaryLimit, Math.min(boundaryLimit, playerRef.current.position.z));
 
-      // Camera follows player at eye level (third-person)
+      // First-person camera position (at player's eye level)
       cameraRef.current.position.set(
-        playerRef.current.position.x,
-        playerRef.current.position.y + 6,
-        playerRef.current.position.z + 12
-      );
-      
-      cameraRef.current.lookAt(
         playerRef.current.position.x,
         playerRef.current.position.y + 3,
         playerRef.current.position.z
+      );
+      
+      // Look direction based on yaw and pitch
+      const lookDirection = new THREE.Vector3(
+        Math.sin(cameraRotationRef.current.yaw) * Math.cos(cameraRotationRef.current.pitch),
+        Math.sin(cameraRotationRef.current.pitch),
+        Math.cos(cameraRotationRef.current.yaw) * Math.cos(cameraRotationRef.current.pitch)
+      );
+      
+      cameraRef.current.lookAt(
+        cameraRef.current.position.x + lookDirection.x,
+        cameraRef.current.position.y + lookDirection.y,
+        cameraRef.current.position.z + lookDirection.z
       );
 
       checkBuildingProximity();
