@@ -105,7 +105,7 @@ const GameUI = ({ gameState, onLogout, onEditCharacter, onOpenDashboard, onOpenW
           </div>
           <div className="flex items-center gap-2">
             <span className="font-mono text-[10px] bg-muted px-1.5 py-0.5 rounded">🖱️</span>
-            <span>Click + drag to rotate camera</span>
+            <span>Hold + drag to rotate camera</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="font-mono text-[10px] bg-muted px-1.5 py-0.5 rounded">💼</span>

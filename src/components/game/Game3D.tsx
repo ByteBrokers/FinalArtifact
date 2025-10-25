@@ -93,7 +93,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
   const keysRef = useRef<Record<string, boolean>>({});
   const animationIdRef = useRef<number>();
   const cameraRotationRef = useRef({ yaw: 0, pitch: 0 });
-  const isPointerLockedRef = useRef(false);
+  const isDraggingRef = useRef(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -109,35 +109,33 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       keysRef.current[e.code] = false;
     };
 
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isPointerLockedRef.current) return;
+    const handleMouseDown = () => {
+      isDraggingRef.current = true;
+    };
 
-      const sensitivity = 0.002;
+    const handleMouseUp = () => {
+      isDraggingRef.current = false;
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current) return;
+
+      const sensitivity = 0.005;
       cameraRotationRef.current.yaw -= e.movementX * sensitivity;
       cameraRotationRef.current.pitch -= e.movementY * sensitivity;
 
-      // Limit pitch to prevent camera flipping
-      cameraRotationRef.current.pitch = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, cameraRotationRef.current.pitch));
-    };
-
-    const handleClick = () => {
-      if (rendererRef.current?.domElement) {
-        rendererRef.current.domElement.requestPointerLock();
-      }
-    };
-
-    const handlePointerLockChange = () => {
-      isPointerLockedRef.current = document.pointerLockElement === rendererRef.current?.domElement;
+      // Limit pitch to prevent going below ground and flipping
+      cameraRotationRef.current.pitch = Math.max(
+        -Math.PI / 3, // Don't go below ground
+        Math.min(Math.PI / 2.5, cameraRotationRef.current.pitch) // Don't flip over
+      );
     };
 
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("keyup", handleKeyUp);
+    document.addEventListener("mousedown", handleMouseDown);
+    document.addEventListener("mouseup", handleMouseUp);
     document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("pointerlockchange", handlePointerLockChange);
-    
-    if (rendererRef.current?.domElement) {
-      rendererRef.current.domElement.addEventListener("click", handleClick);
-    }
 
     return () => {
       if (animationIdRef.current) {
@@ -145,11 +143,9 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       }
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("keyup", handleKeyUp);
+      document.removeEventListener("mousedown", handleMouseDown);
+      document.removeEventListener("mouseup", handleMouseUp);
       document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("pointerlockchange", handlePointerLockChange);
-      if (rendererRef.current?.domElement) {
-        rendererRef.current.domElement.removeEventListener("click", handleClick);
-      }
       if (rendererRef.current && containerRef.current) {
         containerRef.current.removeChild(rendererRef.current.domElement);
         rendererRef.current.dispose();
@@ -938,18 +934,36 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       const forward = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw));
       const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
 
-      // Move in camera direction
+      // Move in camera direction and track movement
+      let isMoving = false;
+      let movementDirection = new THREE.Vector3();
+      
       if (keysRef.current["ArrowUp"] || keysRef.current["KeyW"]) {
         playerRef.current.position.add(forward.clone().multiplyScalar(speed));
+        movementDirection.add(forward);
+        isMoving = true;
       }
       if (keysRef.current["ArrowDown"] || keysRef.current["KeyS"]) {
         playerRef.current.position.add(forward.clone().multiplyScalar(-speed));
+        movementDirection.add(forward.clone().multiplyScalar(-1));
+        isMoving = true;
       }
       if (keysRef.current["ArrowLeft"] || keysRef.current["KeyA"]) {
         playerRef.current.position.add(right.clone().multiplyScalar(-speed));
+        movementDirection.add(right.clone().multiplyScalar(-1));
+        isMoving = true;
       }
       if (keysRef.current["ArrowRight"] || keysRef.current["KeyD"]) {
         playerRef.current.position.add(right.clone().multiplyScalar(speed));
+        movementDirection.add(right);
+        isMoving = true;
+      }
+
+      // Rotate player to face movement direction
+      if (isMoving) {
+        movementDirection.normalize();
+        const targetRotation = Math.atan2(movementDirection.x, movementDirection.z);
+        playerRef.current.rotation.y = targetRotation;
       }
 
       // Boundary collision - keep player inside the wooden fence
