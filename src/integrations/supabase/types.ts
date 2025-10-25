@@ -14,7 +14,192 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      character_customization: {
+        Row: {
+          body_color: string
+          created_at: string
+          facial_expression: string | null
+          height: number
+          id: string
+          shirt_pattern: string | null
+          skin_color: string
+          updated_at: string
+          user_id: string
+          width: number
+        }
+        Insert: {
+          body_color?: string
+          created_at?: string
+          facial_expression?: string | null
+          height?: number
+          id?: string
+          shirt_pattern?: string | null
+          skin_color?: string
+          updated_at?: string
+          user_id: string
+          width?: number
+        }
+        Update: {
+          body_color?: string
+          created_at?: string
+          facial_expression?: string | null
+          height?: number
+          id?: string
+          shirt_pattern?: string | null
+          skin_color?: string
+          updated_at?: string
+          user_id?: string
+          width?: number
+        }
+        Relationships: []
+      }
+      earnings_history: {
+        Row: {
+          amount: number
+          company_name: string
+          created_at: string
+          data_type: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          company_name: string
+          created_at?: string
+          data_type: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          company_name?: string
+          created_at?: string
+          data_type?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      game_state: {
+        Row: {
+          coins: number
+          created_at: string
+          data_types: Json
+          exp: number
+          id: string
+          level: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          coins?: number
+          created_at?: string
+          data_types?: Json
+          exp?: number
+          id?: string
+          level?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          coins?: number
+          created_at?: string
+          data_types?: Json
+          exp?: number
+          id?: string
+          level?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      questionnaire_responses: {
+        Row: {
+          age: string
+          created_at: string
+          data_sharing: string | null
+          devices: string[] | null
+          email: string | null
+          fitness: string | null
+          id: string
+          interests: string | null
+          location: string
+          name: string
+          occupation: string
+          privacy_concern: string | null
+          screen_time: string | null
+          shopping_categories: string[] | null
+          shopping_freq: string | null
+          social_media: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          age: string
+          created_at?: string
+          data_sharing?: string | null
+          devices?: string[] | null
+          email?: string | null
+          fitness?: string | null
+          id?: string
+          interests?: string | null
+          location: string
+          name: string
+          occupation: string
+          privacy_concern?: string | null
+          screen_time?: string | null
+          shopping_categories?: string[] | null
+          shopping_freq?: string | null
+          social_media?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          age?: string
+          created_at?: string
+          data_sharing?: string | null
+          devices?: string[] | null
+          email?: string | null
+          fitness?: string | null
+          id?: string
+          interests?: string | null
+          location?: string
+          name?: string
+          occupation?: string
+          privacy_concern?: string | null
+          screen_time?: string | null
+          shopping_categories?: string[] | null
+          shopping_freq?: string | null
+          social_media?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
