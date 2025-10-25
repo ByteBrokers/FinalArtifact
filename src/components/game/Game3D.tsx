@@ -854,7 +854,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       roof.rotation.y = Math.PI / 4;
       building.add(roof);
 
-      // Add company name sign at entrance
+      // Add company name sign at entrance (above windows and door)
       const canvas = document.createElement('canvas');
       canvas.width = 512;
       canvas.height = 128;
@@ -872,7 +872,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
         new THREE.PlaneGeometry(8, 2),
         signMaterial
       );
-      signMesh.position.set(0, 3, 8.1);
+      signMesh.position.set(0, 10, 8.1);
       building.add(signMesh);
 
       building.position.set(x, 0, z);
