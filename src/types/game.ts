@@ -22,12 +22,16 @@ export interface CharacterCustomizationData {
   width: number;
   facial_expression?: string;
   shirt_pattern?: string;
+  shoe_color?: string;
+  hat_type?: string;
+  accessory?: string;
 }
 
 export interface DataType {
   value: number;
   owned: boolean;
   lastCollectedTime?: number;
+  soldToCompanies?: string[]; // Track which companies have purchased this data
 }
 
 export interface GameStateData {

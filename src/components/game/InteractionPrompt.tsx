@@ -22,8 +22,11 @@ const InteractionPrompt = ({ company, dataTypes, onSell, onClose }: InteractionP
       
       <div className="space-y-2">
         {company.interests.map((dataType) => {
-          if (dataTypes[dataType]?.owned) {
-            const price = Math.floor(dataTypes[dataType].value * company.multiplier);
+          const dataInfo = dataTypes[dataType];
+          const alreadySoldToThisCompany = dataInfo?.soldToCompanies?.includes(company.name);
+          
+          if (dataInfo?.owned && !alreadySoldToThisCompany) {
+            const price = Math.floor(dataInfo.value * company.multiplier);
             return (
               <Button
                 key={dataType}
@@ -38,6 +41,19 @@ const InteractionPrompt = ({ company, dataTypes, onSell, onClose }: InteractionP
               </Button>
             );
           }
+          
+          if (alreadySoldToThisCompany) {
+            return (
+              <div
+                key={dataType}
+                className="w-full py-2 px-3 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded text-xs border border-yellow-500/30 flex items-center justify-between"
+              >
+                <span className="text-left">{dataType}</span>
+                <span className="text-xs">Already sold ✓</span>
+              </div>
+            );
+          }
+          
           return (
             <div
               key={dataType}

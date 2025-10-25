@@ -8,6 +8,7 @@ import DataPanel from "./DataPanel";
 import InteractionPrompt from "./InteractionPrompt";
 import CharacterCustomization from "./CharacterCustomization";
 import Dashboard from "./Dashboard";
+import CustomizationShop from "./CustomizationShop";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -67,6 +68,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
   const [currentCharacterData, setCurrentCharacterData] = useState(characterData);
   const [openWithdrawalOnDashboard, setOpenWithdrawalOnDashboard] = useState(false);
   const [showQuestionnaireEditor, setShowQuestionnaireEditor] = useState(false);
+  const [showCustomizationShop, setShowCustomizationShop] = useState(false);
   const [questionnaireData, setQuestionnaireData] = useState<QuestionnaireData>({
     name: "",
     age: "",
@@ -319,8 +321,9 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     const buildings = createBuildings(scene);
     buildingsRef.current = buildings;
 
+    // Position camera to face the front of the main building (TechCorp at -15, 0, -15)
     camera.position.set(0, 15, 20);
-    camera.lookAt(player.position);
+    camera.lookAt(new THREE.Vector3(-15, 0, -15));
 
     sceneRef.current = scene;
     cameraRef.current = camera;
@@ -418,26 +421,36 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       scene.add(pathMesh);
     });
 
-    // Trees around the village
+    // Trees around the village - positioned on green areas, not on paths
     const treeTrunkMaterial = new THREE.MeshLambertMaterial({ color: 0x8b4513 });
     const treeLeaveMaterial = new THREE.MeshLambertMaterial({ color: 0x228b22 });
     
     const treePositions = [
-      { x: -60, z: -60 }, { x: -60, z: 60 }, { x: 60, z: -60 }, { x: 60, z: 60 },
-      { x: -50, z: 0 }, { x: 50, z: 0 }, { x: 0, z: -50 }, { x: 0, z: 50 },
-      { x: -30, z: -60 }, { x: 30, z: -60 }, { x: -30, z: 60 }, { x: 30, z: 60 }
+      { x: -70, z: -70 }, { x: -70, z: 70 }, { x: 70, z: -70 }, { x: 70, z: 70 },
+      { x: -65, z: 0 }, { x: 65, z: 0 }, { x: 0, z: -65 }, { x: 0, z: 65 },
+      { x: -40, z: -70 }, { x: 40, z: -70 }, { x: -40, z: 70 }, { x: 40, z: 70 },
+      { x: -70, z: -40 }, { x: -70, z: 40 }, { x: 70, z: -40 }, { x: 70, z: 40 }
     ];
     
+    const trees: THREE.Object3D[] = [];
     treePositions.forEach(pos => {
+      const treeGroup = new THREE.Group();
+      
       // Tree trunk
       const trunk = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 6), treeTrunkMaterial);
-      trunk.position.set(pos.x, 3, pos.z);
-      scene.add(trunk);
+      trunk.position.y = 3;
+      treeGroup.add(trunk);
       
       // Tree leaves
       const leaves = new THREE.Mesh(new THREE.SphereGeometry(3), treeLeaveMaterial);
-      leaves.position.set(pos.x, 7, pos.z);
-      scene.add(leaves);
+      leaves.position.y = 7;
+      treeGroup.add(leaves);
+      
+      treeGroup.position.set(pos.x, 0, pos.z);
+      treeGroup.userData.isTree = true;
+      treeGroup.userData.radius = 3; // Collision radius
+      scene.add(treeGroup);
+      trees.push(treeGroup);
     });
 
     // Benches and decorations
@@ -837,6 +850,45 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     }
   };
 
+  const handleShopPurchase = async (updates: Partial<CharacterCustomizationData>, cost: number) => {
+    if (gameState.coins < cost) {
+      toast.error("Not enough coins!");
+      return;
+    }
+
+    const updatedCharacterData = { ...currentCharacterData, ...updates };
+    setCurrentCharacterData(updatedCharacterData);
+
+    // Deduct coins
+    const newGameState = { ...gameState, coins: gameState.coins - cost };
+    setGameState(newGameState);
+
+    try {
+      // Update character customization
+      await supabase
+        .from("character_customization")
+        .update({
+          ...updates,
+        })
+        .eq("user_id", userId);
+
+      // Update coins
+      await supabase
+        .from("game_state")
+        .update({ coins: newGameState.coins })
+        .eq("user_id", userId);
+
+      updatePlayerAppearance(updatedCharacterData);
+      toast.success("Purchase successful!");
+    } catch (error) {
+      console.error("Error purchasing item:", error);
+      toast.error("Purchase failed");
+      // Revert on error
+      setCurrentCharacterData(currentCharacterData);
+      setGameState(gameState);
+    }
+  };
+
   const createBuildings = (scene: THREE.Scene) => {
     const buildings: THREE.Group[] = [];
     const positions = [
@@ -949,24 +1001,36 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       let movementDirection = new THREE.Vector3();
       
       if (keysRef.current["ArrowUp"] || keysRef.current["KeyW"]) {
-        playerRef.current.position.add(forward.clone().multiplyScalar(speed));
-        movementDirection.add(forward);
-        isMoving = true;
+        const newPos = playerRef.current.position.clone().add(forward.clone().multiplyScalar(speed));
+        if (!checkTreeCollision(newPos)) {
+          playerRef.current.position.copy(newPos);
+          movementDirection.add(forward);
+          isMoving = true;
+        }
       }
       if (keysRef.current["ArrowDown"] || keysRef.current["KeyS"]) {
-        playerRef.current.position.add(forward.clone().multiplyScalar(-speed));
-        movementDirection.add(forward.clone().multiplyScalar(-1));
-        isMoving = true;
+        const newPos = playerRef.current.position.clone().add(forward.clone().multiplyScalar(-speed));
+        if (!checkTreeCollision(newPos)) {
+          playerRef.current.position.copy(newPos);
+          movementDirection.add(forward.clone().multiplyScalar(-1));
+          isMoving = true;
+        }
       }
       if (keysRef.current["ArrowLeft"] || keysRef.current["KeyA"]) {
-        playerRef.current.position.add(right.clone().multiplyScalar(-speed));
-        movementDirection.add(right.clone().multiplyScalar(-1));
-        isMoving = true;
+        const newPos = playerRef.current.position.clone().add(right.clone().multiplyScalar(-speed));
+        if (!checkTreeCollision(newPos)) {
+          playerRef.current.position.copy(newPos);
+          movementDirection.add(right.clone().multiplyScalar(-1));
+          isMoving = true;
+        }
       }
       if (keysRef.current["ArrowRight"] || keysRef.current["KeyD"]) {
-        playerRef.current.position.add(right.clone().multiplyScalar(speed));
-        movementDirection.add(right);
-        isMoving = true;
+        const newPos = playerRef.current.position.clone().add(right.clone().multiplyScalar(speed));
+        if (!checkTreeCollision(newPos)) {
+          playerRef.current.position.copy(newPos);
+          movementDirection.add(right);
+          isMoving = true;
+        }
       }
 
       // Rotate player to face movement direction
@@ -1087,6 +1151,20 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     }
   };
 
+  const checkTreeCollision = (newPos: THREE.Vector3): boolean => {
+    if (!sceneRef.current) return false;
+    
+    // Check collision with all trees
+    const trees = sceneRef.current.children.filter(obj => obj.userData.isTree);
+    for (const tree of trees) {
+      const distance = newPos.distanceTo(tree.position);
+      if (distance < tree.userData.radius) {
+        return true; // Collision detected
+      }
+    }
+    return false; // No collision
+  };
+
   const checkBuildingProximity = () => {
     if (!playerRef.current) return;
 
@@ -1116,10 +1194,19 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
 
     const newDataTypes = { ...gameState.data_types };
     const currentTime = Date.now();
+    
+    // Track which companies have bought this data
+    const soldToCompanies = newDataTypes[dataType].soldToCompanies || [];
+    if (soldToCompanies.includes(currentCompany.name)) {
+      toast.error(`You've already sold ${dataType} to ${currentCompany.name}!`);
+      return;
+    }
+    
     newDataTypes[dataType] = { 
       ...newDataTypes[dataType], 
       owned: false,
-      lastCollectedTime: currentTime
+      lastCollectedTime: currentTime,
+      soldToCompanies: [...soldToCompanies, currentCompany.name]
     };
 
     const newCoins = gameState.coins + price;
@@ -1249,6 +1336,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
         }}
         onGoHome={onGoHome}
         onUpdateInfo={() => setShowQuestionnaireEditor(true)}
+        onOpenShop={() => setShowCustomizationShop(true)}
       />
       <DataPanel dataTypes={gameState.data_types} />
       {currentCompany && (
@@ -1304,6 +1392,13 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
           </div>
         </div>
       )}
+      <CustomizationShop
+        open={showCustomizationShop}
+        onClose={() => setShowCustomizationShop(false)}
+        characterData={currentCharacterData}
+        coins={gameState.coins}
+        onPurchase={handleShopPurchase}
+      />
       {showQuestionnaireEditor && (
         <div className="fixed inset-0 z-[60] bg-background/80 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="bg-card border border-border rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
