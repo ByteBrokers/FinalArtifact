@@ -87,17 +87,7 @@ const CharacterCustomization = ({ onComplete, initialData }: CharacterCustomizat
       const ctx = canvas.getContext('2d')!;
       ctx.fillStyle = bodyColor;
       ctx.fillRect(0, 0, 128, 128);
-      // Create lighter version of body color for stripes
-      const tempDiv = document.createElement('div');
-      tempDiv.style.color = bodyColor;
-      document.body.appendChild(tempDiv);
-      const computedColor = window.getComputedStyle(tempDiv).color;
-      document.body.removeChild(tempDiv);
-      ctx.fillStyle = bodyColor;
-      ctx.globalAlpha = 0.5;
-      ctx.fillRect(0, 0, 128, 128);
-      ctx.globalAlpha = 1.0;
-      ctx.fillStyle = bodyColor;
+      ctx.fillStyle = '#ffffff';
       for (let i = 0; i < 128; i += 16) {
         ctx.fillRect(i, 0, 8, 128);
       }
@@ -110,9 +100,7 @@ const CharacterCustomization = ({ onComplete, initialData }: CharacterCustomizat
       const ctx = canvas.getContext('2d')!;
       ctx.fillStyle = bodyColor;
       ctx.fillRect(0, 0, 128, 128);
-      // Use body color with transparency for dots
-      ctx.fillStyle = bodyColor;
-      ctx.globalAlpha = 0.6;
+      ctx.fillStyle = '#ffffff';
       for (let x = 16; x < 128; x += 32) {
         for (let y = 16; y < 128; y += 32) {
           ctx.beginPath();
@@ -120,7 +108,6 @@ const CharacterCustomization = ({ onComplete, initialData }: CharacterCustomizat
           ctx.fill();
         }
       }
-      ctx.globalAlpha = 1.0;
       const texture = new THREE.CanvasTexture(canvas);
       torsoMaterial = new THREE.MeshLambertMaterial({ map: texture });
     } else {
