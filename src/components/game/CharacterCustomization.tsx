@@ -224,10 +224,11 @@ const CharacterCustomization = ({ onComplete, initialData }: CharacterCustomizat
       sceneRef.current.remove(characterRef.current);
       // Create new character with updated settings
       const newCharacter = createCharacter();
+      newCharacter.scale.set(width, height, width);
       sceneRef.current.add(newCharacter);
       characterRef.current = newCharacter;
     }
-  }, [bodyColor, skinColor, facialExpression, shirtPattern]);
+  }, [bodyColor, skinColor, facialExpression, shirtPattern, height, width]);
 
   useEffect(() => {
     if (characterRef.current) {
