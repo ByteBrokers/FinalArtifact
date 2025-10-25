@@ -935,7 +935,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       
       // Calculate forward and right directions based on camera yaw
       const yaw = cameraRotationRef.current.yaw;
-      const forward = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
+      const forward = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw));
       const right = new THREE.Vector3(-Math.cos(yaw), 0, Math.sin(yaw));
 
       // Move in camera direction and track movement
