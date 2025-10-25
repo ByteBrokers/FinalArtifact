@@ -28,6 +28,7 @@ export interface DataType {
   value: number;
   owned: boolean;
   lastCollectedTime?: number;
+  soldToCompanies?: string[];
 }
 
 export interface GameStateData {

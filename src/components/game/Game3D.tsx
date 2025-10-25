@@ -1111,11 +1111,13 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     if (!userId || !currentCompany) return;
 
     const newDataTypes = { ...gameState.data_types };
-    const currentTime = Date.now();
+    const currentData = newDataTypes[dataType] || { value: 0, owned: true, soldToCompanies: [] };
+    const soldToCompanies = currentData.soldToCompanies || [];
+    
+    // Add current company to the list of companies this data was sold to
     newDataTypes[dataType] = { 
-      ...newDataTypes[dataType], 
-      owned: false,
-      lastCollectedTime: currentTime
+      ...currentData,
+      soldToCompanies: [...soldToCompanies, currentCompany.name]
     };
 
     const newCoins = gameState.coins + price;
@@ -1158,7 +1160,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
           company_name: currentCompany.name,
         });
 
-      toast.success(`Sold ${dataType} for ${price} coins!`);
+      toast.success(`Sold ${dataType} to ${currentCompany.name} for ${price} coins!`);
     } catch (error) {
       console.error("Error updating game state:", error);
     }
