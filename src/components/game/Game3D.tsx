@@ -739,11 +739,13 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     const armMaterial = new THREE.MeshLambertMaterial({ color: skinColor });
     const leftArm = new THREE.Mesh(armGeometry, armMaterial);
     leftArm.position.set(-0.8 * charData.width, 1.8 * charData.height, 0);
+    leftArm.userData.isLeftArm = true;
     player.add(leftArm);
 
     // Right Arm
     const rightArm = new THREE.Mesh(armGeometry, armMaterial);
     rightArm.position.set(0.8 * charData.width, 1.8 * charData.height, 0);
+    rightArm.userData.isRightArm = true;
     player.add(rightArm);
 
     // Left Leg
@@ -755,11 +757,15 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     const legMaterial = new THREE.MeshLambertMaterial({ color: bodyColor });
     const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
     leftLeg.position.set(-0.35 * charData.width, 0.5 * charData.height, 0);
+    leftLeg.userData.isLeftLeg = true;
+    leftLeg.userData.baseY = 0.5 * charData.height;
     player.add(leftLeg);
 
     // Right Leg
     const rightLeg = new THREE.Mesh(legGeometry, legMaterial);
     rightLeg.position.set(0.35 * charData.width, 0.5 * charData.height, 0);
+    rightLeg.userData.isRightLeg = true;
+    rightLeg.userData.baseY = 0.5 * charData.height;
     player.add(rightLeg);
 
     // Floating arrow above player - triangle pointing down
@@ -1034,8 +1040,13 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       });
     });
 
-    // Animate player arrow
+    // Animate player arrow and walking animation
     if (playerRef.current) {
+      const isMoving = keysRef.current["ArrowUp"] || keysRef.current["KeyW"] ||
+                      keysRef.current["ArrowDown"] || keysRef.current["KeyS"] ||
+                      keysRef.current["ArrowLeft"] || keysRef.current["KeyA"] ||
+                      keysRef.current["ArrowRight"] || keysRef.current["KeyD"];
+      
       playerRef.current.children.forEach(child => {
         if (child.userData.isPlayerArrow) {
           // Bobbing animation
@@ -1043,6 +1054,30 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
           child.position.y = child.userData.baseY + bobAmount;
           // Gentle rotation
           child.rotation.y += 0.02;
+        }
+        
+        // Walking animation for arms and legs
+        if (isMoving) {
+          const walkCycle = Math.sin(Date.now() * 0.01);
+          
+          if (child.userData.isLeftArm) {
+            child.rotation.x = walkCycle * 0.5;
+          }
+          if (child.userData.isRightArm) {
+            child.rotation.x = -walkCycle * 0.5;
+          }
+          if (child.userData.isLeftLeg) {
+            child.rotation.x = -walkCycle * 0.6;
+          }
+          if (child.userData.isRightLeg) {
+            child.rotation.x = walkCycle * 0.6;
+          }
+        } else {
+          // Reset limbs to neutral position when not moving
+          if (child.userData.isLeftArm || child.userData.isRightArm ||
+              child.userData.isLeftLeg || child.userData.isRightLeg) {
+            child.rotation.x *= 0.9; // Smooth return to neutral
+          }
         }
       });
     }
