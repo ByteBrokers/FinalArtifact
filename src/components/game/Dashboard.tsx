@@ -254,7 +254,7 @@ const Dashboard = ({ userId, characterData, onClose, onEditCharacter, onUpdateIn
     }
   };
 
-  const handleWithdrawal = () => {
+  const handleWithdrawal = async () => {
     if (!withdrawalAmount || parseFloat(withdrawalAmount) <= 0) {
       toast.error("Please enter a valid amount");
       return;
@@ -268,11 +268,30 @@ const Dashboard = ({ userId, characterData, onClose, onEditCharacter, onUpdateIn
       return;
     }
 
-    // Mock withdrawal - just show success message
-    toast.success(`Withdrawal request submitted! You will receive ${withdrawalAmount} NZD to your account.`);
-    setShowWithdrawalDialog(false);
-    setWithdrawalAmount("");
-    setWithdrawalDetails({ fullName: "", bankAccount: "", email: "" });
+    try {
+      const withdrawnAmount = parseFloat(withdrawalAmount);
+      
+      // Record the withdrawal as a negative earnings entry
+      await supabase
+        .from("earnings_history")
+        .insert({
+          user_id: userId,
+          amount: -withdrawnAmount,
+          company_name: "Withdrawal",
+          data_type: "Bank Transfer",
+        });
+
+      toast.success(`Withdrawal request submitted! You will receive ${withdrawalAmount} NZD to your account.`);
+      setShowWithdrawalDialog(false);
+      setWithdrawalAmount("");
+      setWithdrawalDetails({ fullName: "", bankAccount: "", email: "" });
+      
+      // Reload dashboard data to reflect new balance
+      await loadDashboardData();
+    } catch (error) {
+      console.error("Withdrawal error:", error);
+      toast.error("Failed to process withdrawal");
+    }
   };
 
   return (
