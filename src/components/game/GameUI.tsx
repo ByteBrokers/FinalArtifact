@@ -100,8 +100,12 @@ const GameUI = ({ gameState, onLogout, onEditCharacter, onOpenDashboard, onOpenW
         <div className="text-xs font-semibold text-foreground mb-2">Controls</div>
         <div className="space-y-1.5 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] bg-muted px-1.5 py-0.5 rounded">↑↓←→</span>
+            <span className="font-mono text-[10px] bg-muted px-1.5 py-0.5 rounded">WASD/↑↓←→</span>
             <span>Move</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[10px] bg-muted px-1.5 py-0.5 rounded">🖱️</span>
+            <span>Click + drag to rotate camera</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="font-mono text-[10px] bg-muted px-1.5 py-0.5 rounded">💼</span>

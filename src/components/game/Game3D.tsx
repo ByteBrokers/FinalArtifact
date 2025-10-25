@@ -957,24 +957,26 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       playerRef.current.position.x = Math.max(-boundaryLimit, Math.min(boundaryLimit, playerRef.current.position.x));
       playerRef.current.position.z = Math.max(-boundaryLimit, Math.min(boundaryLimit, playerRef.current.position.z));
 
-      // First-person camera position (at player's eye level)
-      cameraRef.current.position.set(
-        playerRef.current.position.x,
-        playerRef.current.position.y + 3,
-        playerRef.current.position.z
-      );
+      // Third-person camera - positioned behind and above player
+      const cameraDistance = 12;
+      const cameraHeight = 6;
+      const pitch = cameraRotationRef.current.pitch;
       
-      // Look direction based on yaw and pitch
-      const lookDirection = new THREE.Vector3(
-        Math.sin(cameraRotationRef.current.yaw) * Math.cos(cameraRotationRef.current.pitch),
-        Math.sin(cameraRotationRef.current.pitch),
-        Math.cos(cameraRotationRef.current.yaw) * Math.cos(cameraRotationRef.current.pitch)
+      // Camera offset based on rotation
+      const cameraOffsetX = -Math.sin(yaw) * cameraDistance * Math.cos(pitch);
+      const cameraOffsetZ = -Math.cos(yaw) * cameraDistance * Math.cos(pitch);
+      const cameraOffsetY = cameraHeight + Math.sin(pitch) * cameraDistance;
+      
+      cameraRef.current.position.set(
+        playerRef.current.position.x + cameraOffsetX,
+        playerRef.current.position.y + cameraOffsetY,
+        playerRef.current.position.z + cameraOffsetZ
       );
       
       cameraRef.current.lookAt(
-        cameraRef.current.position.x + lookDirection.x,
-        cameraRef.current.position.y + lookDirection.y,
-        cameraRef.current.position.z + lookDirection.z
+        playerRef.current.position.x,
+        playerRef.current.position.y + 3,
+        playerRef.current.position.z
       );
 
       checkBuildingProximity();
