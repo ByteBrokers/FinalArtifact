@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { GameStateData } from "@/types/game";
-import { BarChart3, UserPen, LogOut, Wallet, Home, FileText } from "lucide-react";
+import { BarChart3, UserPen, LogOut, Wallet, Home, FileText, ChevronDown, ChevronUp } from "lucide-react";
 
 interface GameUIProps {
   gameState: GameStateData;
@@ -13,87 +14,100 @@ interface GameUIProps {
 }
 
 const GameUI = ({ gameState, onLogout, onEditCharacter, onOpenDashboard, onOpenWithdraw, onGoHome, onUpdateInfo }: GameUIProps) => {
+  const [balanceExpanded, setBalanceExpanded] = useState(false);
+
   return (
     <>
-      <div className="absolute top-4 left-4 bg-card/95 backdrop-blur-xl border border-border shadow-xl rounded-2xl p-4 min-w-[200px]">
-        <div className="flex items-center gap-3 mb-3 pb-3 border-b border-border">
+      <div className="absolute top-4 left-4 bg-card/95 backdrop-blur-xl border border-border shadow-xl rounded-2xl p-4 min-w-[200px] z-50">
+        <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-lg">
             💰
           </div>
-          <div>
+          <div className="flex-1">
             <div className="text-xs text-muted-foreground font-medium">Balance</div>
             <div className="text-xl font-bold text-foreground">{gameState.coins}</div>
           </div>
+          <button
+            onClick={() => setBalanceExpanded(!balanceExpanded)}
+            className="p-1 hover:bg-muted rounded transition-colors"
+            aria-label="Toggle balance details"
+          >
+            {balanceExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </button>
         </div>
         
-        <div className="flex items-center justify-between text-xs mb-3 pb-3 border-b border-border">
-          <div className="text-center">
-            <div className="text-muted-foreground mb-1">Level</div>
-            <div className="text-sm font-semibold text-foreground">{gameState.level}</div>
-          </div>
-          <div className="h-6 w-px bg-border"></div>
-          <div className="text-center">
-            <div className="text-muted-foreground mb-1">XP</div>
-            <div className="text-sm font-semibold text-foreground">{gameState.exp}</div>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-3 gap-1.5">
-          <Button 
-            onClick={onGoHome} 
-            variant="outline" 
-            size="sm"
-            className="h-auto w-full flex flex-col gap-1 py-2"
-          >
-            <Home className="h-4 w-4" />
-            <span className="text-[10px]">Home</span>
-          </Button>
-          <Button 
-            onClick={onOpenDashboard} 
-            variant="outline" 
-            size="sm"
-            className="h-auto w-full flex flex-col gap-1 py-2"
-          >
-            <BarChart3 className="h-4 w-4" />
-            <span className="text-[10px]">Dashboard</span>
-          </Button>
-          <Button 
-            onClick={onEditCharacter} 
-            variant="outline" 
-            size="sm"
-            className="h-auto w-full flex flex-col gap-1 py-2"
-          >
-            <UserPen className="h-4 w-4" />
-            <span className="text-[10px]">Character</span>
-          </Button>
-          <Button 
-            onClick={onUpdateInfo}
-            variant="outline" 
-            size="sm"
-            className="h-auto w-full flex flex-col gap-1 py-2"
-          >
-            <FileText className="h-4 w-4" />
-            <span className="text-[10px]">Update</span>
-          </Button>
-          <Button 
-            onClick={onOpenWithdraw}
-            variant="outline" 
-            size="sm"
-            className="h-auto w-full flex flex-col gap-1 py-2"
-          >
-            <Wallet className="h-4 w-4" />
-            <span className="text-[10px]">Withdraw</span>
-          </Button>
-          <Button 
-            onClick={onLogout} 
-            variant="destructive" 
-            size="sm"
-            className="h-auto w-full flex flex-col gap-1 py-2"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="text-[10px]">Logout</span>
-          </Button>
-        </div>
+        {balanceExpanded && (
+          <>
+            <div className="flex items-center justify-between text-xs mb-3 pb-3 border-b border-border">
+              <div className="text-center">
+                <div className="text-muted-foreground mb-1">Level</div>
+                <div className="text-sm font-semibold text-foreground">{gameState.level}</div>
+              </div>
+              <div className="h-6 w-px bg-border"></div>
+              <div className="text-center">
+                <div className="text-muted-foreground mb-1">XP</div>
+                <div className="text-sm font-semibold text-foreground">{gameState.exp}</div>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-1.5">
+              <Button 
+                onClick={onGoHome} 
+                variant="outline" 
+                size="sm"
+                className="h-auto w-full flex flex-col gap-1 py-2"
+              >
+                <Home className="h-4 w-4" />
+                <span className="text-[10px]">Home</span>
+              </Button>
+              <Button 
+                onClick={onOpenDashboard} 
+                variant="outline" 
+                size="sm"
+                className="h-auto w-full flex flex-col gap-1 py-2"
+              >
+                <BarChart3 className="h-4 w-4" />
+                <span className="text-[10px]">Dashboard</span>
+              </Button>
+              <Button 
+                onClick={onEditCharacter} 
+                variant="outline" 
+                size="sm"
+                className="h-auto w-full flex flex-col gap-1 py-2"
+              >
+                <UserPen className="h-4 w-4" />
+                <span className="text-[10px]">Character</span>
+              </Button>
+              <Button 
+                onClick={onUpdateInfo}
+                variant="outline" 
+                size="sm"
+                className="h-auto w-full flex flex-col gap-1 py-2"
+              >
+                <FileText className="h-4 w-4" />
+                <span className="text-[10px]">Update</span>
+              </Button>
+              <Button 
+                onClick={onOpenWithdraw}
+                variant="outline" 
+                size="sm"
+                className="h-auto w-full flex flex-col gap-1 py-2"
+              >
+                <Wallet className="h-4 w-4" />
+                <span className="text-[10px]">Withdraw</span>
+              </Button>
+              <Button 
+                onClick={onLogout} 
+                variant="destructive" 
+                size="sm"
+                className="h-auto w-full flex flex-col gap-1 py-2"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="text-[10px]">Logout</span>
+              </Button>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="absolute bottom-4 left-4 bg-card/95 backdrop-blur-xl border border-border shadow-xl rounded-xl p-3 max-w-[220px]">
