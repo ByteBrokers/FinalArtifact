@@ -20,11 +20,7 @@ const Index = () => {
       <div className="relative z-10 w-full max-w-6xl mx-auto">
         {/* Logo and Header */}
         <div className="text-center mb-12 space-y-4">
-          <img
-            src={logoImage}
-            alt="ByteBrokers Logo"
-            className="w-48 h-auto mx-auto mb-6 opacity-90 min-h-[292.031px]"
-          />
+          <img src={logoImage} alt="ByteBrokers Logo" className="w-48  mx-auto mb-6 opacity-90 h-[293px]" />
           <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
             Welcome to ByteBrokers
           </h1>
