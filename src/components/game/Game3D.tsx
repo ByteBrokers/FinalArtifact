@@ -660,15 +660,15 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
           : new THREE.BoxGeometry(0.15 * charData.height, 0.15 * charData.height, 0.05);
     const eyeMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
     const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
-    leftEye.position.set(-0.2 * charData.width, 3.15 * charData.height, 0.31 * charData.width);
+    leftEye.position.set(-0.2 * charData.width, 3.15 * charData.height, 0.5 * charData.width);
     player.add(leftEye);
 
     const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
     if (facialExpression === "wink") {
       rightEye.scale.y = 3;
-      rightEye.position.set(0.2 * charData.width, 3.15 * charData.height, 0.31 * charData.width);
+      rightEye.position.set(0.2 * charData.width, 3.15 * charData.height, 0.5 * charData.width);
     } else {
-      rightEye.position.set(0.2 * charData.width, 3.15 * charData.height, 0.31 * charData.width);
+      rightEye.position.set(0.2 * charData.width, 3.15 * charData.height, 0.5 * charData.width);
     }
     player.add(rightEye);
 
