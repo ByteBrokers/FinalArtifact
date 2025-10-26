@@ -6,9 +6,11 @@ interface InteractionPromptProps {
   dataTypes: Record<string, DataType>;
   onSell: (dataType: string, price: number) => void;
   onClose: () => void;
+  onStartSurvey: () => void;
+  surveyCompleted: boolean;
 }
 
-const InteractionPrompt = ({ company, dataTypes, onSell, onClose }: InteractionPromptProps) => {
+const InteractionPrompt = ({ company, dataTypes, onSell, onClose, onStartSurvey, surveyCompleted }: InteractionPromptProps) => {
   return (
     <div className="absolute bottom-1/2 left-1/2 transform -translate-x-1/2 bg-card backdrop-blur-xl border border-border shadow-xl text-foreground p-4 rounded-xl min-w-[280px] max-w-[320px] z-50">
       <div className="mb-3 pb-3 border-b border-border">
@@ -67,7 +69,21 @@ const InteractionPrompt = ({ company, dataTypes, onSell, onClose }: InteractionP
         })}
       </div>
       
-      <div className="mt-3 pt-3 border-t border-border text-center">
+      <div className="mt-3 pt-3 border-t border-border">
+        {!surveyCompleted ? (
+          <Button
+            onClick={onStartSurvey}
+            className="w-full mb-3"
+            variant="secondary"
+          >
+            Complete Survey (+earn coins)
+          </Button>
+        ) : (
+          <div className="w-full py-2 px-3 bg-muted/50 text-muted-foreground rounded text-sm border border-border text-center mb-3">
+            Survey completed ✓
+          </div>
+        )}
+        
         <p className="text-xs text-muted-foreground flex items-center justify-center gap-1.5">
           <span className="inline-block w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>
           Walk away to close

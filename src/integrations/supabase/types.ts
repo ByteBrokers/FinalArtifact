@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      business_surveys: {
+        Row: {
+          company_name: string
+          completed_at: string
+          earnings: number
+          id: string
+          user_id: string
+        }
+        Insert: {
+          company_name: string
+          completed_at?: string
+          earnings?: number
+          id?: string
+          user_id: string
+        }
+        Update: {
+          company_name?: string
+          completed_at?: string
+          earnings?: number
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       character_customization: {
         Row: {
           body_color: string

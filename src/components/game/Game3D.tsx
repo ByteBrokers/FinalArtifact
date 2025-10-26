@@ -8,6 +8,7 @@ import DataPanel from "./DataPanel";
 import InteractionPrompt from "./InteractionPrompt";
 import CharacterCustomization from "./CharacterCustomization";
 import Dashboard from "./Dashboard";
+import BusinessSurvey from "./BusinessSurvey";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -67,6 +68,8 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
   const [currentCharacterData, setCurrentCharacterData] = useState(characterData);
   const [openWithdrawalOnDashboard, setOpenWithdrawalOnDashboard] = useState(false);
   const [showQuestionnaireEditor, setShowQuestionnaireEditor] = useState(false);
+  const [showSurvey, setShowSurvey] = useState(false);
+  const [completedSurveys, setCompletedSurveys] = useState<string[]>([]);
   const [questionnaireData, setQuestionnaireData] = useState<QuestionnaireData>({
     name: "",
     age: "",
@@ -1160,6 +1163,16 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
         email: data.email || "",
       });
     }
+
+    // Load completed surveys
+    const { data: surveys } = await supabase
+      .from("business_surveys")
+      .select("company_name")
+      .eq("user_id", userId);
+    
+    if (surveys) {
+      setCompletedSurveys(surveys.map(s => s.company_name));
+    }
   };
 
   const handleCheckboxChange = (field: keyof QuestionnaireData, value: string, checked: boolean) => {
@@ -1307,12 +1320,46 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
         onUpdateInfo={() => setShowQuestionnaireEditor(true)}
       />
       <DataPanel dataTypes={gameState.data_types} />
-      {currentCompany && (
+      {currentCompany && !showSurvey && (
         <InteractionPrompt
           company={currentCompany}
           dataTypes={gameState.data_types}
           onSell={handleSellData}
           onClose={() => setCurrentCompany(null)}
+          onStartSurvey={() => setShowSurvey(true)}
+          surveyCompleted={completedSurveys.includes(currentCompany.name)}
+        />
+      )}
+      {currentCompany && showSurvey && (
+        <BusinessSurvey
+          company={currentCompany}
+          onComplete={async (earnings) => {
+            // Add earnings to coins
+            const newCoins = gameState.coins + earnings;
+            setGameState((prev) => ({ ...prev, coins: newCoins }));
+
+            // Save to database
+            await supabase
+              .from("game_state")
+              .update({ coins: newCoins })
+              .eq("user_id", userId);
+
+            // Record survey completion
+            await supabase
+              .from("business_surveys")
+              .insert({
+                user_id: userId,
+                company_name: currentCompany.name,
+                earnings,
+              });
+
+            // Update completed surveys list
+            setCompletedSurveys([...completedSurveys, currentCompany.name]);
+
+            toast.success(`Survey completed! You earned ${earnings} coins!`);
+            setShowSurvey(false);
+          }}
+          onClose={() => setShowSurvey(false)}
         />
       )}
       {showDashboard && (
