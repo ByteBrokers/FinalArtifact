@@ -1203,8 +1203,67 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     });
   };
 
+  const generateDataTypes = (data: QuestionnaireData) => {
+    const types: any = {};
+
+    if (data.location) {
+      types['Location Data'] = { 
+        value: 60 + (data.devices?.includes('smartphone') ? 30 : 0), 
+        owned: true 
+      };
+    }
+
+    if (data.social_media && data.social_media.length > 0) {
+      types['Social Media'] = { 
+        value: 50 + (data.social_media.length * 15), 
+        owned: true 
+      };
+    }
+
+    if (data.shopping_freq && data.shopping_freq !== 'rarely') {
+      types['Shopping Habits'] = { 
+        value: 70 + ((data.shopping_categories?.length || 0) * 10), 
+        owned: true 
+      };
+    }
+
+    if (data.screen_time) {
+      const timeValue = data.screen_time === '10+' ? 100 : 
+                       data.screen_time === '7-9' ? 80 : 
+                       data.screen_time === '4-6' ? 60 : 40;
+      types['Digital Habits'] = { value: timeValue, owned: true };
+    }
+
+    if (data.devices && data.devices.length > 0) {
+      types['Device Usage'] = { 
+        value: 45 + (data.devices.length * 15), 
+        owned: true 
+      };
+    }
+
+    if (data.fitness === 'yes-regularly') {
+      types['Health Data'] = { value: 120, owned: true };
+    } else if (data.fitness === 'yes-occasionally') {
+      types['Fitness Data'] = { value: 80, owned: true };
+    }
+
+    if (data.privacy_concern) {
+      const privacyValue = data.privacy_concern === 'very-concerned' ? 40 : 
+                          data.privacy_concern === 'somewhat-concerned' ? 60 : 
+                          data.privacy_concern === 'not-very-concerned' ? 80 : 100;
+      types['Privacy Preferences'] = { value: privacyValue, owned: true };
+    }
+
+    if (data.interests) {
+      types['Interests'] = { value: 55, owned: true };
+    }
+
+    return types;
+  };
+
   const handleUpdateQuestionnaire = async () => {
     try {
+      // Update questionnaire responses
       await supabase
         .from("questionnaire_responses")
         .update({
@@ -1224,6 +1283,34 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
           email: questionnaireData.email,
         })
         .eq("user_id", userId);
+
+      // Regenerate data types based on updated questionnaire
+      const newDataTypes = generateDataTypes(questionnaireData);
+      
+      // Merge with existing data types to preserve soldToCompanies
+      const mergedDataTypes = { ...gameState.data_types };
+      Object.keys(newDataTypes).forEach((type) => {
+        if (mergedDataTypes[type]) {
+          // Keep existing soldToCompanies but update value and owned status
+          mergedDataTypes[type] = {
+            ...mergedDataTypes[type],
+            value: newDataTypes[type].value,
+            owned: newDataTypes[type].owned,
+          };
+        } else {
+          // New data type
+          mergedDataTypes[type] = newDataTypes[type];
+        }
+      });
+
+      // Update game state in database
+      await supabase
+        .from("game_state")
+        .update({ data_types: mergedDataTypes as any })
+        .eq("user_id", userId);
+
+      // Update local state
+      setGameState((prev) => ({ ...prev, data_types: mergedDataTypes }));
 
       toast.success("Information updated successfully!");
       setShowQuestionnaireEditor(false);
