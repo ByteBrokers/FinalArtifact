@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { supabase } from "@/integrations/supabase/client";
-import logoImage from '@/assets/bytebrokerslogo1.png';
+import logoImage from "@/assets/bytebrokerslogo1.png";
 import { toast } from "sonner";
 import GameUI from "./GameUI";
 import DataPanel from "./DataPanel";
@@ -92,7 +92,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
   const npcsRef = useRef<Array<{ mesh: THREE.Group; speed: number; direction: THREE.Vector3; nextTurn: number }>>([]);
   const keysRef = useRef<Record<string, boolean>>({});
   const animationIdRef = useRef<number>();
-  const cameraRotationRef = useRef({ yaw: 0, pitch: 0 });
+  const cameraRotationRef = useRef({ yaw: 180, pitch: 0 });
   const isDraggingRef = useRef(false);
 
   useEffect(() => {
@@ -127,7 +127,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       // Limit pitch to prevent going below ground and flipping
       cameraRotationRef.current.pitch = Math.max(
         -Math.PI / 3, // Don't go below ground
-        Math.min(Math.PI / 2.5, cameraRotationRef.current.pitch) // Don't flip over
+        Math.min(Math.PI / 2.5, cameraRotationRef.current.pitch), // Don't flip over
       );
     };
 
@@ -174,7 +174,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
 
       if (hasUpdates) {
         setGameState((prev) => ({ ...prev, data_types: updatedDataTypes }));
-        
+
         // Update database
         if (userId) {
           try {
@@ -198,13 +198,8 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x7ec0ee); // Natural sky blue
     scene.fog = new THREE.Fog(0x7ec0ee, 50, 200); // Atmospheric fog
-    
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
-    );
+
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     containerRef.current!.appendChild(renderer.domElement);
@@ -229,86 +224,86 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     const fenceMaterial = new THREE.MeshLambertMaterial({ color: 0x8b4513 });
     const fenceHeight = 5;
     const fenceThickness = 1;
-    
+
     // North wall
     const northWall = new THREE.Mesh(new THREE.BoxGeometry(150, fenceHeight, fenceThickness), fenceMaterial);
     northWall.position.set(0, fenceHeight / 2, -75);
     scene.add(northWall);
-    
+
     // South wall
     const southWall = new THREE.Mesh(new THREE.BoxGeometry(150, fenceHeight, fenceThickness), fenceMaterial);
     southWall.position.set(0, fenceHeight / 2, 75);
     scene.add(southWall);
-    
+
     // East wall
     const eastWall = new THREE.Mesh(new THREE.BoxGeometry(fenceThickness, fenceHeight, 150), fenceMaterial);
     eastWall.position.set(75, fenceHeight / 2, 0);
     scene.add(eastWall);
-    
+
     // West wall
     const westWall = new THREE.Mesh(new THREE.BoxGeometry(fenceThickness, fenceHeight, 150), fenceMaterial);
     westWall.position.set(-75, fenceHeight / 2, 0);
     scene.add(westWall);
-    
+
     // Add clouds to the sky
     createClouds(scene);
 
     // ByteBrokers centerpiece
     const createByteBrokerSign = () => {
       const group = new THREE.Group();
-      
+
       // Sign post
       const postGeometry = new THREE.CylinderGeometry(0.2, 0.2, 8);
       const postMaterial = new THREE.MeshLambertMaterial({ color: 0x4a4a4a });
       const post = new THREE.Mesh(postGeometry, postMaterial);
       post.position.y = 4;
       group.add(post);
-      
+
       // Sign board with gradient effect (blue to purple)
       const boardGeometry = new THREE.BoxGeometry(12, 3, 0.3);
       const boardMaterialBlue = new THREE.MeshLambertMaterial({ color: 0x3b82f6 });
       const boardMaterialPurple = new THREE.MeshLambertMaterial({ color: 0x9333ea });
-      
+
       // Create left half (blue)
       const boardLeft = new THREE.Mesh(new THREE.BoxGeometry(6, 3, 0.3), boardMaterialBlue);
       boardLeft.position.set(-3, 8.5, 0);
       group.add(boardLeft);
-      
+
       // Create right half (purple)
       const boardRight = new THREE.Mesh(new THREE.BoxGeometry(6, 3, 0.3), boardMaterialPurple);
       boardRight.position.set(3, 8.5, 0);
       group.add(boardRight);
-      
+
       // Create "ByteBrokers" text using canvas texture
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       canvas.width = 1024;
       canvas.height = 256;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       if (ctx) {
         // Create gradient background
         const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-        gradient.addColorStop(0, '#3b82f6');
-        gradient.addColorStop(1, '#9333ea');
+        gradient.addColorStop(0, "#3b82f6");
+        gradient.addColorStop(1, "#9333ea");
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 120px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('ByteBrokers', canvas.width / 2, canvas.height / 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 120px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("ByteBrokers", canvas.width / 2, canvas.height / 2);
       }
-      
+
       const texture = new THREE.CanvasTexture(canvas);
       const textMaterial = new THREE.MeshBasicMaterial({ map: texture });
       const textBoard = new THREE.Mesh(boardGeometry, textMaterial);
       textBoard.position.y = 8.5;
       textBoard.position.z = 0.16;
       group.add(textBoard);
-      
+
       group.position.set(0, 0, 0);
       return group;
     };
-    
+
     scene.add(createByteBrokerSign());
 
     createCityEnvironment(scene);
@@ -331,10 +326,10 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
   };
 
   const createClouds = (scene: THREE.Scene) => {
-    const cloudMaterial = new THREE.MeshLambertMaterial({ 
-      color: 0xffffff, 
-      transparent: true, 
-      opacity: 0.9 
+    const cloudMaterial = new THREE.MeshLambertMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.9,
     });
 
     // Create multiple clouds at different positions - lower and bigger
@@ -351,24 +346,24 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       { x: 60, y: 35, z: -10 },
     ];
 
-    cloudPositions.forEach(pos => {
+    cloudPositions.forEach((pos) => {
       const cloud = new THREE.Group();
-      
+
       // Create cloud from multiple spheres for a fluffy look - bigger spheres
       const sphereGeometry = new THREE.SphereGeometry(5, 8, 8);
-      
+
       for (let i = 0; i < 6; i++) {
         const sphere = new THREE.Mesh(sphereGeometry, cloudMaterial);
         const offsetX = (Math.random() - 0.5) * 10;
         const offsetY = (Math.random() - 0.5) * 4;
         const offsetZ = (Math.random() - 0.5) * 8;
         const scale = 0.8 + Math.random() * 0.8;
-        
+
         sphere.position.set(offsetX, offsetY, offsetZ);
         sphere.scale.set(scale, scale * 0.7, scale);
         cloud.add(sphere);
       }
-      
+
       cloud.position.set(pos.x, pos.y, pos.z);
       scene.add(cloud);
     });
@@ -377,7 +372,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
   const createCityEnvironment = (scene: THREE.Scene) => {
     // Village paths - dirt paths
     const pathMaterial = new THREE.MeshLambertMaterial({ color: 0xc4a574 });
-    
+
     // Main horizontal path
     const mainPath = new THREE.Mesh(new THREE.PlaneGeometry(140, 8), pathMaterial);
     mainPath.rotation.x = -Math.PI / 2;
@@ -395,45 +390,47 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       { startX: 0, startZ: 0, endX: -30, endZ: -30 },
       { startX: 0, startZ: 0, endX: 30, endZ: -30 },
       { startX: 0, startZ: 0, endX: -30, endZ: 30 },
-      { startX: 0, startZ: 0, endX: 30, endZ: 30 }
+      { startX: 0, startZ: 0, endX: 30, endZ: 30 },
     ];
 
-    buildingPaths.forEach(path => {
+    buildingPaths.forEach((path) => {
       const deltaX = path.endX - path.startX;
       const deltaZ = path.endZ - path.startZ;
       const length = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
       const angle = Math.atan2(deltaZ, deltaX);
-      
-      const pathMesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(length, 4),
-        pathMaterial
-      );
+
+      const pathMesh = new THREE.Mesh(new THREE.PlaneGeometry(length, 4), pathMaterial);
       pathMesh.rotation.x = -Math.PI / 2;
       pathMesh.rotation.z = -angle;
-      pathMesh.position.set(
-        (path.startX + path.endX) / 2,
-        0.01,
-        (path.startZ + path.endZ) / 2
-      );
+      pathMesh.position.set((path.startX + path.endX) / 2, 0.01, (path.startZ + path.endZ) / 2);
       scene.add(pathMesh);
     });
 
     // Trees around the village
     const treeTrunkMaterial = new THREE.MeshLambertMaterial({ color: 0x8b4513 });
     const treeLeaveMaterial = new THREE.MeshLambertMaterial({ color: 0x228b22 });
-    
+
     const treePositions = [
-      { x: -60, z: -60 }, { x: -60, z: 60 }, { x: 60, z: -60 }, { x: 60, z: 60 },
-      { x: -50, z: 0 }, { x: 50, z: 0 }, { x: 0, z: -50 }, { x: 0, z: 50 },
-      { x: -30, z: -60 }, { x: 30, z: -60 }, { x: -30, z: 60 }, { x: 30, z: 60 }
+      { x: -60, z: -60 },
+      { x: -60, z: 60 },
+      { x: 60, z: -60 },
+      { x: 60, z: 60 },
+      { x: -50, z: 0 },
+      { x: 50, z: 0 },
+      { x: 0, z: -50 },
+      { x: 0, z: 50 },
+      { x: -30, z: -60 },
+      { x: 30, z: -60 },
+      { x: -30, z: 60 },
+      { x: 30, z: 60 },
     ];
-    
-    treePositions.forEach(pos => {
+
+    treePositions.forEach((pos) => {
       // Tree trunk
       const trunk = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 6), treeTrunkMaterial);
       trunk.position.set(pos.x, 3, pos.z);
       scene.add(trunk);
-      
+
       // Tree leaves
       const leaves = new THREE.Mesh(new THREE.SphereGeometry(3), treeLeaveMaterial);
       leaves.position.set(pos.x, 7, pos.z);
@@ -443,14 +440,17 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     // Benches and decorations
     const benchMaterial = new THREE.MeshLambertMaterial({ color: 0x8b4513 });
     const benchPositions = [
-      { x: 20, z: 20 }, { x: -20, z: 20 }, { x: 20, z: -20 }, { x: -20, z: -20 }
+      { x: 20, z: 20 },
+      { x: -20, z: 20 },
+      { x: 20, z: -20 },
+      { x: -20, z: -20 },
     ];
-    
-    benchPositions.forEach(pos => {
+
+    benchPositions.forEach((pos) => {
       const bench = new THREE.Mesh(new THREE.BoxGeometry(4, 1, 1.5), benchMaterial);
       bench.position.set(pos.x, 0.5, pos.z);
       scene.add(bench);
-      
+
       const backrest = new THREE.Mesh(new THREE.BoxGeometry(4, 2, 0.3), benchMaterial);
       backrest.position.set(pos.x, 1.5, pos.z - 0.6);
       scene.add(backrest);
@@ -459,11 +459,11 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     // Add logo to the sky (parallel to user at startup)
     const textureLoader = new THREE.TextureLoader();
     textureLoader.load(logoImage, (texture) => {
-      const logoMaterial = new THREE.MeshBasicMaterial({ 
-        map: texture, 
+      const logoMaterial = new THREE.MeshBasicMaterial({
+        map: texture,
         transparent: true,
         opacity: 0.4,
-        side: THREE.DoubleSide
+        side: THREE.DoubleSide,
       });
       const logoGeometry = new THREE.PlaneGeometry(15, 22);
       const logoMesh = new THREE.Mesh(logoGeometry, logoMaterial);
@@ -475,12 +475,12 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     // Create animated NPCs (people walking around) - Roblox-style characters
     for (let i = 0; i < 15; i++) {
       const npc = new THREE.Group();
-      
+
       const bodyColors = [0x1e40af, 0x7c3aed, 0x059669, 0xdc2626, 0xf59e0b];
       const skinColors = [0xffdbac, 0xd4a574, 0x8d5524, 0x4a2511, 0xffe0bd];
       const bodyColor = bodyColors[Math.floor(Math.random() * bodyColors.length)];
       const skinColor = skinColors[Math.floor(Math.random() * skinColors.length)];
-      
+
       // Torso (rectangular block)
       const torsoGeometry = new THREE.BoxGeometry(1.2, 1.8, 0.6);
       const torsoMaterial = new THREE.MeshLambertMaterial({ color: bodyColor });
@@ -515,8 +515,8 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       // Hair (blocky top)
       const hairColors = [0x2c1810, 0xffd700, 0xff6347, 0x000000, 0x8b4513];
       const hairGeometry = new THREE.BoxGeometry(0.85, 0.3, 0.85);
-      const hairMaterial = new THREE.MeshLambertMaterial({ 
-        color: hairColors[Math.floor(Math.random() * hairColors.length)] 
+      const hairMaterial = new THREE.MeshLambertMaterial({
+        color: hairColors[Math.floor(Math.random() * hairColors.length)],
       });
       const hair = new THREE.Mesh(hairGeometry, hairMaterial);
       hair.position.y = 3.55;
@@ -545,34 +545,28 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       const rightLeg = new THREE.Mesh(legGeometry, legMaterial);
       rightLeg.position.set(0.35, 0.5, 0);
       npc.add(rightLeg);
-      
+
       // Random starting position
-      npc.position.set(
-        Math.random() * 60 - 30,
-        0,
-        Math.random() * 60 - 30
-      );
-      
+      npc.position.set(Math.random() * 60 - 30, 0, Math.random() * 60 - 30);
+
       scene.add(npc);
       npcsRef.current.push({
         mesh: npc,
         speed: 0.02 + Math.random() * 0.03,
-        direction: new THREE.Vector3(
-          Math.random() - 0.5,
-          0,
-          Math.random() - 0.5
-        ).normalize(),
-        nextTurn: Math.random() * 300 + 100
+        direction: new THREE.Vector3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize(),
+        nextTurn: Math.random() * 300 + 100,
       });
     }
 
     // Street lights at intersections
     const streetLightPositions = [
-      { x: -10, z: -10 }, { x: 10, z: -10 },
-      { x: -10, z: 10 }, { x: 10, z: 10 }
+      { x: -10, z: -10 },
+      { x: 10, z: -10 },
+      { x: -10, z: 10 },
+      { x: 10, z: 10 },
     ];
 
-    streetLightPositions.forEach(pos => {
+    streetLightPositions.forEach((pos) => {
       const lamppost = new THREE.Group();
 
       // Post
@@ -608,35 +602,31 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     const shirtPattern = charData.shirt_pattern || "solid";
 
     // Torso (rectangular block) with pattern
-    const torsoGeometry = new THREE.BoxGeometry(
-      1.2 * charData.width,
-      1.8 * charData.height,
-      0.6 * charData.width
-    );
-    
+    const torsoGeometry = new THREE.BoxGeometry(1.2 * charData.width, 1.8 * charData.height, 0.6 * charData.width);
+
     // Create texture for shirt pattern
     let torsoMaterial;
     if (shirtPattern === "stripes") {
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       canvas.width = 128;
       canvas.height = 128;
-      const ctx = canvas.getContext('2d')!;
+      const ctx = canvas.getContext("2d")!;
       ctx.fillStyle = charData.body_color;
       ctx.fillRect(0, 0, 128, 128);
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = "#ffffff";
       for (let i = 0; i < 128; i += 16) {
         ctx.fillRect(i, 0, 8, 128);
       }
       const texture = new THREE.CanvasTexture(canvas);
       torsoMaterial = new THREE.MeshLambertMaterial({ map: texture });
     } else if (shirtPattern === "dots") {
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       canvas.width = 128;
       canvas.height = 128;
-      const ctx = canvas.getContext('2d')!;
+      const ctx = canvas.getContext("2d")!;
       ctx.fillStyle = charData.body_color;
       ctx.fillRect(0, 0, 128, 128);
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = "#ffffff";
       for (let x = 16; x < 128; x += 32) {
         for (let y = 16; y < 128; y += 32) {
           ctx.beginPath();
@@ -649,33 +639,30 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     } else {
       torsoMaterial = new THREE.MeshLambertMaterial({ color: bodyColor });
     }
-    
+
     const torso = new THREE.Mesh(torsoGeometry, torsoMaterial);
     torso.position.y = 1.8 * charData.height;
     player.add(torso);
 
     // Head (cubic block)
-    const headGeometry = new THREE.BoxGeometry(
-      0.8 * charData.height,
-      0.8 * charData.height,
-      0.8 * charData.height
-    );
+    const headGeometry = new THREE.BoxGeometry(0.8 * charData.height, 0.8 * charData.height, 0.8 * charData.height);
     const headMaterial = new THREE.MeshLambertMaterial({ color: skinColor });
     const head = new THREE.Mesh(headGeometry, headMaterial);
     head.position.y = 3.1 * charData.height;
     player.add(head);
 
     // Eyes - different styles based on expression
-    const eyeGeometry = facialExpression === "wink" 
-      ? new THREE.BoxGeometry(0.15 * charData.height, 0.05 * charData.height, 0.05)
-      : facialExpression === "surprised"
-      ? new THREE.BoxGeometry(0.2 * charData.height, 0.2 * charData.height, 0.05)
-      : new THREE.BoxGeometry(0.15 * charData.height, 0.15 * charData.height, 0.05);
+    const eyeGeometry =
+      facialExpression === "wink"
+        ? new THREE.BoxGeometry(0.15 * charData.height, 0.05 * charData.height, 0.05)
+        : facialExpression === "surprised"
+          ? new THREE.BoxGeometry(0.2 * charData.height, 0.2 * charData.height, 0.05)
+          : new THREE.BoxGeometry(0.15 * charData.height, 0.15 * charData.height, 0.05);
     const eyeMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
     const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
     leftEye.position.set(-0.2 * charData.width, 3.15 * charData.height, 0.31 * charData.width);
     player.add(leftEye);
-    
+
     const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
     if (facialExpression === "wink") {
       rightEye.scale.y = 3;
@@ -698,10 +685,10 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     } else {
       mouthGeometry = new THREE.BoxGeometry(0.3 * charData.height, 0.08 * charData.height, 0.05);
     }
-    
+
     const mouthMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
     const mouth = new THREE.Mesh(mouthGeometry, mouthMaterial);
-    
+
     if (facialExpression === "sad") {
       mouth.position.set(0, 2.8 * charData.height, 0.31 * charData.width);
       mouth.rotation.z = Math.PI;
@@ -716,22 +703,14 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     player.add(mouth);
 
     // Hair (blocky top)
-    const hairGeometry = new THREE.BoxGeometry(
-      0.85 * charData.height,
-      0.3 * charData.height,
-      0.85 * charData.height
-    );
+    const hairGeometry = new THREE.BoxGeometry(0.85 * charData.height, 0.3 * charData.height, 0.85 * charData.height);
     const hairMaterial = new THREE.MeshLambertMaterial({ color: 0x2c1810 });
     const hair = new THREE.Mesh(hairGeometry, hairMaterial);
     hair.position.y = 3.55 * charData.height;
     player.add(hair);
 
     // Left Arm
-    const armGeometry = new THREE.BoxGeometry(
-      0.4 * charData.width,
-      1.6 * charData.height,
-      0.4 * charData.width
-    );
+    const armGeometry = new THREE.BoxGeometry(0.4 * charData.width, 1.6 * charData.height, 0.4 * charData.width);
     const armMaterial = new THREE.MeshLambertMaterial({ color: skinColor });
     const leftArm = new THREE.Mesh(armGeometry, armMaterial);
     leftArm.position.set(-0.8 * charData.width, 1.8 * charData.height, 0);
@@ -745,11 +724,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     player.add(rightArm);
 
     // Left Leg
-    const legGeometry = new THREE.BoxGeometry(
-      0.5 * charData.width,
-      1.4 * charData.height,
-      0.5 * charData.width
-    );
+    const legGeometry = new THREE.BoxGeometry(0.5 * charData.width, 1.4 * charData.height, 0.5 * charData.width);
     const legMaterial = new THREE.MeshLambertMaterial({ color: bodyColor });
     const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
     leftLeg.position.set(-0.35 * charData.width, 0.5 * charData.height, 0);
@@ -766,24 +741,24 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
 
     // Floating arrow above player - triangle pointing down
     const arrowShape = new THREE.Shape();
-    arrowShape.moveTo(0, 0.5);      // top point
-    arrowShape.lineTo(-0.5, -0.5);  // bottom left
-    arrowShape.lineTo(0.5, -0.5);   // bottom right
-    arrowShape.lineTo(0, 0.5);      // back to top
-    
+    arrowShape.moveTo(0, 0.5); // top point
+    arrowShape.lineTo(-0.5, -0.5); // bottom left
+    arrowShape.lineTo(0.5, -0.5); // bottom right
+    arrowShape.lineTo(0, 0.5); // back to top
+
     const arrowGeometry = new THREE.ShapeGeometry(arrowShape);
-    const arrowMaterial = new THREE.MeshBasicMaterial({ 
+    const arrowMaterial = new THREE.MeshBasicMaterial({
       color: 0xffff00,
-      side: THREE.DoubleSide
+      side: THREE.DoubleSide,
     });
     const arrow = new THREE.Mesh(arrowGeometry, arrowMaterial);
     arrow.position.y = 5.5 * charData.height;
     arrow.rotation.x = Math.PI / 2; // Make it horizontal so it's visible from above
-    
+
     // Store animation data
     arrow.userData.isPlayerArrow = true;
     arrow.userData.baseY = 5.5 * charData.height;
-    
+
     player.add(arrow);
 
     return player;
@@ -802,7 +777,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
 
   const handleCharacterUpdate = async (data: CharacterCustomizationData) => {
     setCurrentCharacterData(data);
-    
+
     try {
       await supabase
         .from("character_customization")
@@ -818,13 +793,13 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
 
       toast.success("Character updated!");
       setIsEditingCharacter(false);
-      
+
       // If we came from dashboard, return to dashboard
       if (returnToDashboard) {
         setShowDashboard(true);
         setReturnToDashboard(false);
       }
-      
+
       // Pass the new data directly to avoid state timing issues
       updatePlayerAppearance(data);
     } catch (error) {
@@ -855,11 +830,11 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
 
       // Add glowing outline effect
       const outlineGeometry = new THREE.BoxGeometry(15.5, 12.5, 15.5);
-      const outlineMaterial = new THREE.MeshBasicMaterial({ 
-        color: company.color, 
-        transparent: true, 
+      const outlineMaterial = new THREE.MeshBasicMaterial({
+        color: company.color,
+        transparent: true,
         opacity: 0.3,
-        side: THREE.BackSide 
+        side: THREE.BackSide,
       });
       const outline = new THREE.Mesh(outlineGeometry, outlineMaterial);
       outline.position.y = 6;
@@ -870,7 +845,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       const window1 = new THREE.Mesh(new THREE.PlaneGeometry(3, 3), windowMaterial);
       window1.position.set(-3, 6, 7.6);
       building.add(window1);
-      
+
       const window2 = new THREE.Mesh(new THREE.PlaneGeometry(3, 3), windowMaterial);
       window2.position.set(3, 6, 7.6);
       building.add(window2);
@@ -891,23 +866,20 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       building.add(roof);
 
       // Add company name sign at entrance (above windows and door)
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       canvas.width = 512;
       canvas.height = 128;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       if (ctx) {
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 60px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 60px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
         ctx.fillText(company.name, canvas.width / 2, canvas.height / 2);
       }
       const signTexture = new THREE.CanvasTexture(canvas);
       const signMaterial = new THREE.MeshBasicMaterial({ map: signTexture });
-      const signMesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(8, 2),
-        signMaterial
-      );
+      const signMesh = new THREE.Mesh(new THREE.PlaneGeometry(8, 2), signMaterial);
       signMesh.position.set(0, 10, 8.1);
       building.add(signMesh);
 
@@ -934,7 +906,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
 
     if (playerRef.current && cameraRef.current) {
       const speed = 0.5;
-      
+
       // Calculate forward and right directions based on camera yaw
       const yaw = cameraRotationRef.current.yaw;
       const forward = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw));
@@ -943,7 +915,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       // Move in camera direction and track movement
       let isMoving = false;
       let movementDirection = new THREE.Vector3();
-      
+
       if (keysRef.current["ArrowUp"] || keysRef.current["KeyW"]) {
         playerRef.current.position.add(forward.clone().multiplyScalar(speed));
         movementDirection.add(forward);
@@ -981,55 +953,49 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       const cameraDistance = 12;
       const cameraHeight = 6;
       const pitch = cameraRotationRef.current.pitch;
-      
+
       // Camera offset based on rotation
       const cameraOffsetX = -Math.sin(yaw) * cameraDistance * Math.cos(pitch);
       const cameraOffsetZ = -Math.cos(yaw) * cameraDistance * Math.cos(pitch);
       const cameraOffsetY = cameraHeight + Math.sin(pitch) * cameraDistance;
-      
+
       cameraRef.current.position.set(
         playerRef.current.position.x + cameraOffsetX,
         playerRef.current.position.y + cameraOffsetY,
-        playerRef.current.position.z + cameraOffsetZ
+        playerRef.current.position.z + cameraOffsetZ,
       );
-      
+
       cameraRef.current.lookAt(
         playerRef.current.position.x,
         playerRef.current.position.y + 3,
-        playerRef.current.position.z
+        playerRef.current.position.z,
       );
 
       checkBuildingProximity();
     }
 
     // Animate NPCs
-    npcsRef.current.forEach(npc => {
+    npcsRef.current.forEach((npc) => {
       // Move NPC
       npc.mesh.position.add(npc.direction.clone().multiplyScalar(npc.speed));
-      
+
       // Make NPC face movement direction
       npc.mesh.rotation.y = Math.atan2(npc.direction.x, npc.direction.z);
-      
+
       // Bobbing animation for walking effect (keeping NPCs grounded)
       npc.mesh.position.y = Math.abs(Math.sin(Date.now() * 0.01 * npc.speed * 50)) * 0.05;
-      
+
       // Change direction occasionally or when hitting boundaries
       npc.nextTurn--;
-      if (npc.nextTurn <= 0 || 
-          Math.abs(npc.mesh.position.x) > 40 || 
-          Math.abs(npc.mesh.position.z) > 40) {
-        npc.direction = new THREE.Vector3(
-          Math.random() - 0.5,
-          0,
-          Math.random() - 0.5
-        ).normalize();
+      if (npc.nextTurn <= 0 || Math.abs(npc.mesh.position.x) > 40 || Math.abs(npc.mesh.position.z) > 40) {
+        npc.direction = new THREE.Vector3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize();
         npc.nextTurn = Math.random() * 300 + 100;
       }
     });
 
     // Animate building beacons
-    buildingsRef.current.forEach(building => {
-      building.children.forEach(child => {
+    buildingsRef.current.forEach((building) => {
+      building.children.forEach((child) => {
         if (child.userData.isBeacon) {
           child.rotation.y += 0.05;
         }
@@ -1038,12 +1004,17 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
 
     // Animate player arrow and walking animation
     if (playerRef.current) {
-      const isMoving = keysRef.current["ArrowUp"] || keysRef.current["KeyW"] ||
-                      keysRef.current["ArrowDown"] || keysRef.current["KeyS"] ||
-                      keysRef.current["ArrowLeft"] || keysRef.current["KeyA"] ||
-                      keysRef.current["ArrowRight"] || keysRef.current["KeyD"];
-      
-      playerRef.current.children.forEach(child => {
+      const isMoving =
+        keysRef.current["ArrowUp"] ||
+        keysRef.current["KeyW"] ||
+        keysRef.current["ArrowDown"] ||
+        keysRef.current["KeyS"] ||
+        keysRef.current["ArrowLeft"] ||
+        keysRef.current["KeyA"] ||
+        keysRef.current["ArrowRight"] ||
+        keysRef.current["KeyD"];
+
+      playerRef.current.children.forEach((child) => {
         if (child.userData.isPlayerArrow) {
           // Bobbing animation
           const bobAmount = Math.sin(Date.now() * 0.003) * 0.3;
@@ -1051,11 +1022,11 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
           // Gentle rotation
           child.rotation.y += 0.02;
         }
-        
+
         // Walking animation for arms and legs
         if (isMoving) {
           const walkCycle = Math.sin(Date.now() * 0.01);
-          
+
           if (child.userData.isLeftArm) {
             child.rotation.x = walkCycle * 0.5;
           }
@@ -1070,8 +1041,12 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
           }
         } else {
           // Reset limbs to neutral position when not moving
-          if (child.userData.isLeftArm || child.userData.isRightArm ||
-              child.userData.isLeftLeg || child.userData.isRightLeg) {
+          if (
+            child.userData.isLeftArm ||
+            child.userData.isRightArm ||
+            child.userData.isLeftLeg ||
+            child.userData.isRightLeg
+          ) {
             child.rotation.x *= 0.9; // Smooth return to neutral
           }
         }
@@ -1113,11 +1088,11 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     const newDataTypes = { ...gameState.data_types };
     const currentData = newDataTypes[dataType] || { value: 0, owned: true, soldToCompanies: [] };
     const soldToCompanies = currentData.soldToCompanies || [];
-    
+
     // Add current company to the list of companies this data was sold to
-    newDataTypes[dataType] = { 
+    newDataTypes[dataType] = {
       ...currentData,
-      soldToCompanies: [...soldToCompanies, currentCompany.name]
+      soldToCompanies: [...soldToCompanies, currentCompany.name],
     };
 
     const newCoins = gameState.coins + price;
@@ -1151,14 +1126,12 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
         .eq("user_id", userId);
 
       // Record earnings in history
-      await supabase
-        .from("earnings_history")
-        .insert({
-          user_id: userId,
-          amount: price,
-          data_type: dataType,
-          company_name: currentCompany.name,
-        });
+      await supabase.from("earnings_history").insert({
+        user_id: userId,
+        amount: price,
+        data_type: dataType,
+        company_name: currentCompany.name,
+      });
 
       toast.success(`Sold ${dataType} to ${currentCompany.name} for ${price} coins!`);
     } catch (error) {
@@ -1167,11 +1140,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
   };
 
   const loadQuestionnaireData = async () => {
-    const { data } = await supabase
-      .from("questionnaire_responses")
-      .select("*")
-      .eq("user_id", userId)
-      .maybeSingle();
+    const { data } = await supabase.from("questionnaire_responses").select("*").eq("user_id", userId).maybeSingle();
 
     if (data) {
       setQuestionnaireData({
@@ -1197,9 +1166,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     const currentValues = (questionnaireData[field] as string[]) || [];
     setQuestionnaireData({
       ...questionnaireData,
-      [field]: checked
-        ? [...currentValues, value]
-        : currentValues.filter((v) => v !== value),
+      [field]: checked ? [...currentValues, value] : currentValues.filter((v) => v !== value),
     });
   };
 
@@ -1207,55 +1174,59 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     const types: any = {};
 
     if (data.location) {
-      types['Location Data'] = { 
-        value: 60 + (data.devices?.includes('smartphone') ? 30 : 0), 
-        owned: true 
+      types["Location Data"] = {
+        value: 60 + (data.devices?.includes("smartphone") ? 30 : 0),
+        owned: true,
       };
     }
 
     if (data.social_media && data.social_media.length > 0) {
-      types['Social Media'] = { 
-        value: 50 + (data.social_media.length * 15), 
-        owned: true 
+      types["Social Media"] = {
+        value: 50 + data.social_media.length * 15,
+        owned: true,
       };
     }
 
-    if (data.shopping_freq && data.shopping_freq !== 'rarely') {
-      types['Shopping Habits'] = { 
-        value: 70 + ((data.shopping_categories?.length || 0) * 10), 
-        owned: true 
+    if (data.shopping_freq && data.shopping_freq !== "rarely") {
+      types["Shopping Habits"] = {
+        value: 70 + (data.shopping_categories?.length || 0) * 10,
+        owned: true,
       };
     }
 
     if (data.screen_time) {
-      const timeValue = data.screen_time === '10+' ? 100 : 
-                       data.screen_time === '7-9' ? 80 : 
-                       data.screen_time === '4-6' ? 60 : 40;
-      types['Digital Habits'] = { value: timeValue, owned: true };
+      const timeValue =
+        data.screen_time === "10+" ? 100 : data.screen_time === "7-9" ? 80 : data.screen_time === "4-6" ? 60 : 40;
+      types["Digital Habits"] = { value: timeValue, owned: true };
     }
 
     if (data.devices && data.devices.length > 0) {
-      types['Device Usage'] = { 
-        value: 45 + (data.devices.length * 15), 
-        owned: true 
+      types["Device Usage"] = {
+        value: 45 + data.devices.length * 15,
+        owned: true,
       };
     }
 
-    if (data.fitness === 'yes-regularly') {
-      types['Health Data'] = { value: 120, owned: true };
-    } else if (data.fitness === 'yes-occasionally') {
-      types['Fitness Data'] = { value: 80, owned: true };
+    if (data.fitness === "yes-regularly") {
+      types["Health Data"] = { value: 120, owned: true };
+    } else if (data.fitness === "yes-occasionally") {
+      types["Fitness Data"] = { value: 80, owned: true };
     }
 
     if (data.privacy_concern) {
-      const privacyValue = data.privacy_concern === 'very-concerned' ? 40 : 
-                          data.privacy_concern === 'somewhat-concerned' ? 60 : 
-                          data.privacy_concern === 'not-very-concerned' ? 80 : 100;
-      types['Privacy Preferences'] = { value: privacyValue, owned: true };
+      const privacyValue =
+        data.privacy_concern === "very-concerned"
+          ? 40
+          : data.privacy_concern === "somewhat-concerned"
+            ? 60
+            : data.privacy_concern === "not-very-concerned"
+              ? 80
+              : 100;
+      types["Privacy Preferences"] = { value: privacyValue, owned: true };
     }
 
     if (data.interests) {
-      types['Interests'] = { value: 55, owned: true };
+      types["Interests"] = { value: 55, owned: true };
     }
 
     return types;
@@ -1286,7 +1257,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
 
       // Regenerate data types based on updated questionnaire
       const newDataTypes = generateDataTypes(questionnaireData);
-      
+
       // Merge with existing data types to preserve soldToCompanies
       const mergedDataTypes = { ...gameState.data_types };
       Object.keys(newDataTypes).forEach((type) => {
@@ -1323,9 +1294,9 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
   return (
     <div className="relative w-full h-screen overflow-hidden">
       <div ref={containerRef} className="w-full h-full" />
-      <GameUI 
-        gameState={gameState} 
-        onLogout={onLogout} 
+      <GameUI
+        gameState={gameState}
+        onLogout={onLogout}
         onEditCharacter={() => setIsEditingCharacter(true)}
         onOpenDashboard={() => setShowDashboard(true)}
         onOpenWithdraw={() => {
@@ -1345,9 +1316,9 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
         />
       )}
       {showDashboard && (
-        <Dashboard 
-          userId={userId} 
-          characterData={currentCharacterData} 
+        <Dashboard
+          userId={userId}
+          characterData={currentCharacterData}
           onClose={() => {
             setShowDashboard(false);
             setOpenWithdrawalOnDashboard(false);
@@ -1382,10 +1353,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
                 ×
               </button>
             </div>
-            <CharacterCustomization
-              initialData={currentCharacterData}
-              onComplete={handleCharacterUpdate}
-            />
+            <CharacterCustomization initialData={currentCharacterData} onComplete={handleCharacterUpdate} />
           </div>
         </div>
       )}
@@ -1394,7 +1362,12 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
           <div className="bg-card border border-border rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-card/95 backdrop-blur-xl border-b border-border p-6 flex justify-between items-center">
               <h2 className="text-2xl font-bold text-foreground">Update Your Information</h2>
-              <Button onClick={() => setShowQuestionnaireEditor(false)} variant="ghost" size="icon" className="rounded-full">
+              <Button
+                onClick={() => setShowQuestionnaireEditor(false)}
+                variant="ghost"
+                size="icon"
+                className="rounded-full"
+              >
                 <X className="h-5 w-5" />
               </Button>
             </div>
@@ -1416,7 +1389,10 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
                   </div>
                   <div>
                     <Label htmlFor="edit-age">Age Range</Label>
-                    <Select value={questionnaireData.age} onValueChange={(value) => setQuestionnaireData({ ...questionnaireData, age: value })}>
+                    <Select
+                      value={questionnaireData.age}
+                      onValueChange={(value) => setQuestionnaireData({ ...questionnaireData, age: value })}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -1468,9 +1444,13 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
                           <Checkbox
                             id={`edit-${device.value}`}
                             checked={questionnaireData.devices?.includes(device.value)}
-                            onCheckedChange={(checked) => handleCheckboxChange("devices", device.value, checked as boolean)}
+                            onCheckedChange={(checked) =>
+                              handleCheckboxChange("devices", device.value, checked as boolean)
+                            }
                           />
-                          <Label htmlFor={`edit-${device.value}`} className="cursor-pointer">{device.label}</Label>
+                          <Label htmlFor={`edit-${device.value}`} className="cursor-pointer">
+                            {device.label}
+                          </Label>
                         </div>
                       ))}
                     </div>
@@ -1491,9 +1471,13 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
                           <Checkbox
                             id={`edit-${platform.value}`}
                             checked={questionnaireData.social_media?.includes(platform.value)}
-                            onCheckedChange={(checked) => handleCheckboxChange("social_media", platform.value, checked as boolean)}
+                            onCheckedChange={(checked) =>
+                              handleCheckboxChange("social_media", platform.value, checked as boolean)
+                            }
                           />
-                          <Label htmlFor={`edit-${platform.value}`} className="cursor-pointer">{platform.label}</Label>
+                          <Label htmlFor={`edit-${platform.value}`} className="cursor-pointer">
+                            {platform.label}
+                          </Label>
                         </div>
                       ))}
                     </div>
@@ -1501,7 +1485,10 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
 
                   <div>
                     <Label htmlFor="edit-screen-time">Daily Hours Online</Label>
-                    <Select value={questionnaireData.screen_time} onValueChange={(value) => setQuestionnaireData({ ...questionnaireData, screen_time: value })}>
+                    <Select
+                      value={questionnaireData.screen_time}
+                      onValueChange={(value) => setQuestionnaireData({ ...questionnaireData, screen_time: value })}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -1524,7 +1511,10 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
                 <CardContent className="space-y-4">
                   <div>
                     <Label htmlFor="edit-shopping-freq">Online Shopping Frequency</Label>
-                    <Select value={questionnaireData.shopping_freq} onValueChange={(value) => setQuestionnaireData({ ...questionnaireData, shopping_freq: value })}>
+                    <Select
+                      value={questionnaireData.shopping_freq}
+                      onValueChange={(value) => setQuestionnaireData({ ...questionnaireData, shopping_freq: value })}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -1552,9 +1542,13 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
                           <Checkbox
                             id={`edit-${category.value}`}
                             checked={questionnaireData.shopping_categories?.includes(category.value)}
-                            onCheckedChange={(checked) => handleCheckboxChange("shopping_categories", category.value, checked as boolean)}
+                            onCheckedChange={(checked) =>
+                              handleCheckboxChange("shopping_categories", category.value, checked as boolean)
+                            }
                           />
-                          <Label htmlFor={`edit-${category.value}`} className="cursor-pointer">{category.label}</Label>
+                          <Label htmlFor={`edit-${category.value}`} className="cursor-pointer">
+                            {category.label}
+                          </Label>
                         </div>
                       ))}
                     </div>
@@ -1562,7 +1556,10 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
 
                   <div>
                     <Label htmlFor="edit-fitness">Fitness Tracking</Label>
-                    <Select value={questionnaireData.fitness} onValueChange={(value) => setQuestionnaireData({ ...questionnaireData, fitness: value })}>
+                    <Select
+                      value={questionnaireData.fitness}
+                      onValueChange={(value) => setQuestionnaireData({ ...questionnaireData, fitness: value })}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -1594,7 +1591,10 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
                 <CardContent className="space-y-4">
                   <div>
                     <Label htmlFor="edit-privacy">Privacy Concern Level</Label>
-                    <Select value={questionnaireData.privacy_concern} onValueChange={(value) => setQuestionnaireData({ ...questionnaireData, privacy_concern: value })}>
+                    <Select
+                      value={questionnaireData.privacy_concern}
+                      onValueChange={(value) => setQuestionnaireData({ ...questionnaireData, privacy_concern: value })}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -1609,7 +1609,10 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
 
                   <div>
                     <Label htmlFor="edit-data-sharing">Data Sharing for Benefits</Label>
-                    <Select value={questionnaireData.data_sharing} onValueChange={(value) => setQuestionnaireData({ ...questionnaireData, data_sharing: value })}>
+                    <Select
+                      value={questionnaireData.data_sharing}
+                      onValueChange={(value) => setQuestionnaireData({ ...questionnaireData, data_sharing: value })}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
