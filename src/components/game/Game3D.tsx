@@ -92,7 +92,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
   const npcsRef = useRef<Array<{ mesh: THREE.Group; speed: number; direction: THREE.Vector3; nextTurn: number }>>([]);
   const keysRef = useRef<Record<string, boolean>>({});
   const animationIdRef = useRef<number>();
-  const cameraRotationRef = useRef({ yaw: 180, pitch: 0 });
+  const cameraRotationRef = useRef({ yaw: Math.PI, pitch: 0 });
   const isDraggingRef = useRef(false);
 
   useEffect(() => {
