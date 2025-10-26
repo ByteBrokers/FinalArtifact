@@ -19,7 +19,7 @@ const InteractionPrompt = ({
   surveyCompleted,
 }: InteractionPromptProps) => {
   return (
-    <div className="absolute bottom-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-card backdrop-blur-xl border border-border shadow-xl text-foreground p-4 rounded-xl min-w-[280px] max-w-[320px] z-50">
+    <div className="absolute bottom-1/2 left-1/2 transform -translate-x-1/2 translate-y-1/2 bg-card backdrop-blur-xl border border-border shadow-xl text-foreground p-4 rounded-xl min-w-[280px] max-w-[320px] z-50">
       <div className="mb-3 pb-3 border-b border-border">
         <h3 className="text-lg font-bold mb-1">{company.name}</h3>
         <p className="text-xs text-muted-foreground leading-relaxed">{company.description}</p>
