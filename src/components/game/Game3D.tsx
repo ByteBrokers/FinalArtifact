@@ -660,15 +660,15 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
           : new THREE.BoxGeometry(0.15 * charData.height, 0.15 * charData.height, 0.05);
     const eyeMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
     const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
-    leftEye.position.set(-0.2 * charData.width, 3.15 * charData.height, 0.5 * charData.width);
+    leftEye.position.set(-0.2 * charData.width, 3.15 * charData.height, 0.6 * charData.width);
     player.add(leftEye);
 
     const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
     if (facialExpression === "wink") {
       rightEye.scale.y = 3;
-      rightEye.position.set(0.2 * charData.width, 3.15 * charData.height, 0.5 * charData.width);
+      rightEye.position.set(0.2 * charData.width, 3.15 * charData.height, 0.6 * charData.width);
     } else {
-      rightEye.position.set(0.2 * charData.width, 3.15 * charData.height, 0.5 * charData.width);
+      rightEye.position.set(0.2 * charData.width, 3.15 * charData.height, 0.6 * charData.width);
     }
     player.add(rightEye);
 
@@ -690,15 +690,15 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     const mouth = new THREE.Mesh(mouthGeometry, mouthMaterial);
 
     if (facialExpression === "sad") {
-      mouth.position.set(0, 2.8 * charData.height, 0.5 * charData.width);
+      mouth.position.set(0, 2.8 * charData.height, 0.6 * charData.width);
       mouth.rotation.z = Math.PI;
     } else if (facialExpression === "angry") {
-      mouth.position.set(0, 2.82 * charData.height, 0.5 * charData.width);
+      mouth.position.set(0, 2.82 * charData.height, 0.6 * charData.width);
       mouth.rotation.z = Math.PI * 0.05;
     } else if (facialExpression === "surprised") {
-      mouth.position.set(0, 2.82 * charData.height, 0.5 * charData.width);
+      mouth.position.set(0, 2.82 * charData.height, 0.6 * charData.width);
     } else {
-      mouth.position.set(0, 2.85 * charData.height, 0.5 * charData.width);
+      mouth.position.set(0, 2.85 * charData.height, 0.6 * charData.width);
     }
     player.add(mouth);
 
