@@ -13,18 +13,23 @@ interface GameUIProps {
   onUpdateInfo: () => void;
 }
 
-const GameUI = ({ gameState, onLogout, onEditCharacter, onOpenDashboard, onOpenWithdraw, onGoHome, onUpdateInfo }: GameUIProps) => {
+const GameUI = ({
+  gameState,
+  onLogout,
+  onEditCharacter,
+  onOpenDashboard,
+  onOpenWithdraw,
+  onGoHome,
+  onUpdateInfo,
+}: GameUIProps) => {
   const [balanceExpanded, setBalanceExpanded] = useState(false);
   const [controlsExpanded, setControlsExpanded] = useState(false);
-
 
   return (
     <>
       <div className="absolute top-4 left-4 bg-card/95 backdrop-blur-xl border border-border shadow-xl rounded-2xl p-4 min-w-[200px] z-50">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-lg">
-            💰
-          </div>
+          <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-lg">💰</div>
           <div className="flex-1">
             <div className="text-xs text-muted-foreground font-medium">Balance</div>
             <div className="text-xl font-bold text-foreground">{gameState.coins}</div>
@@ -37,7 +42,7 @@ const GameUI = ({ gameState, onLogout, onEditCharacter, onOpenDashboard, onOpenW
             {balanceExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </button>
         </div>
-        
+
         {balanceExpanded && (
           <div className="mt-3 pt-3 border-t border-border">
             <div className="flex items-center justify-between text-xs mb-3">
@@ -51,56 +56,51 @@ const GameUI = ({ gameState, onLogout, onEditCharacter, onOpenDashboard, onOpenW
                 <div className="text-sm font-semibold text-foreground">{gameState.exp}</div>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-3 gap-1.5">
-              <Button 
-                onClick={onGoHome} 
-                variant="outline" 
-                size="sm"
-                className="h-auto w-full flex flex-col gap-1 py-2"
-              >
+              <Button onClick={onGoHome} variant="outline" size="sm" className="h-auto w-full flex flex-col gap-1 py-2">
                 <Home className="h-4 w-4" />
                 <span className="text-[10px]">Home</span>
               </Button>
-              <Button 
-                onClick={onOpenDashboard} 
-                variant="outline" 
+              <Button
+                onClick={onOpenDashboard}
+                variant="outline"
                 size="sm"
                 className="h-auto w-full flex flex-col gap-1 py-2"
               >
                 <BarChart3 className="h-4 w-4" />
                 <span className="text-[10px]">Dashboard</span>
               </Button>
-              <Button 
-                onClick={onEditCharacter} 
-                variant="outline" 
+              <Button
+                onClick={onEditCharacter}
+                variant="outline"
                 size="sm"
                 className="h-auto w-full flex flex-col gap-1 py-2"
               >
                 <UserPen className="h-4 w-4" />
                 <span className="text-[10px]">Character</span>
               </Button>
-              <Button 
+              <Button
                 onClick={onUpdateInfo}
-                variant="outline" 
+                variant="outline"
                 size="sm"
                 className="h-auto w-full flex flex-col gap-1 py-2"
               >
                 <FileText className="h-4 w-4" />
                 <span className="text-[10px]">Update</span>
               </Button>
-              <Button 
+              <Button
                 onClick={onOpenWithdraw}
-                variant="outline" 
+                variant="outline"
                 size="sm"
                 className="h-auto w-full flex flex-col gap-1 py-2"
               >
                 <Wallet className="h-4 w-4" />
                 <span className="text-[10px]">Withdraw</span>
               </Button>
-              <Button 
-                onClick={onLogout} 
-                variant="destructive" 
+              <Button
+                onClick={onLogout}
+                variant="destructive"
                 size="sm"
                 className="h-auto w-full flex flex-col gap-1 py-2"
               >
@@ -123,7 +123,7 @@ const GameUI = ({ gameState, onLogout, onEditCharacter, onOpenDashboard, onOpenW
             {controlsExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </button>
         </div>
-        
+
         {controlsExpanded && (
           <div className="space-y-1.5 text-xs text-muted-foreground mt-2 pt-2 border-t border-border">
             <div className="flex items-center gap-2">

@@ -19,7 +19,9 @@ const Game = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth");
         return;
@@ -109,55 +111,59 @@ const Game = () => {
     const types: any = {};
 
     if (data.location) {
-      types['Location Data'] = { 
-        value: 60 + (data.devices?.includes('smartphone') ? 30 : 0), 
-        owned: true 
+      types["Location Data"] = {
+        value: 60 + (data.devices?.includes("smartphone") ? 30 : 0),
+        owned: true,
       };
     }
 
     if (data.social_media && data.social_media.length > 0) {
-      types['Social Media'] = { 
-        value: 50 + (data.social_media.length * 15), 
-        owned: true 
+      types["Social Media"] = {
+        value: 50 + data.social_media.length * 15,
+        owned: true,
       };
     }
 
-    if (data.shopping_freq && data.shopping_freq !== 'rarely') {
-      types['Shopping Habits'] = { 
-        value: 70 + ((data.shopping_categories?.length || 0) * 10), 
-        owned: true 
+    if (data.shopping_freq && data.shopping_freq !== "rarely") {
+      types["Shopping Habits"] = {
+        value: 70 + (data.shopping_categories?.length || 0) * 10,
+        owned: true,
       };
     }
 
     if (data.screen_time) {
-      const timeValue = data.screen_time === '10+' ? 100 : 
-                       data.screen_time === '7-9' ? 80 : 
-                       data.screen_time === '4-6' ? 60 : 40;
-      types['Digital Habits'] = { value: timeValue, owned: true };
+      const timeValue =
+        data.screen_time === "10+" ? 100 : data.screen_time === "7-9" ? 80 : data.screen_time === "4-6" ? 60 : 40;
+      types["Digital Habits"] = { value: timeValue, owned: true };
     }
 
     if (data.devices && data.devices.length > 0) {
-      types['Device Usage'] = { 
-        value: 45 + (data.devices.length * 15), 
-        owned: true 
+      types["Device Usage"] = {
+        value: 45 + data.devices.length * 15,
+        owned: true,
       };
     }
 
-    if (data.fitness === 'yes-regularly') {
-      types['Health Data'] = { value: 120, owned: true };
-    } else if (data.fitness === 'yes-occasionally') {
-      types['Fitness Data'] = { value: 80, owned: true };
+    if (data.fitness === "yes-regularly") {
+      types["Health Data"] = { value: 120, owned: true };
+    } else if (data.fitness === "yes-occasionally") {
+      types["Fitness Data"] = { value: 80, owned: true };
     }
 
     if (data.privacy_concern) {
-      const privacyValue = data.privacy_concern === 'very-concerned' ? 40 : 
-                          data.privacy_concern === 'somewhat-concerned' ? 60 : 
-                          data.privacy_concern === 'not-very-concerned' ? 80 : 100;
-      types['Privacy Preferences'] = { value: privacyValue, owned: true };
+      const privacyValue =
+        data.privacy_concern === "very-concerned"
+          ? 40
+          : data.privacy_concern === "somewhat-concerned"
+            ? 60
+            : data.privacy_concern === "not-very-concerned"
+              ? 80
+              : 100;
+      types["Privacy Preferences"] = { value: privacyValue, owned: true };
     }
 
     if (data.interests) {
-      types['Interests'] = { value: 55, owned: true };
+      types["Interests"] = { value: 55, owned: true };
     }
 
     return types;
@@ -165,7 +171,7 @@ const Game = () => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate("/auth");
+    navigate("/");
   };
 
   const handleGoHome = () => {
@@ -173,21 +179,19 @@ const Game = () => {
   };
 
   if (!userId) {
-    return <div className="min-h-screen bg-gradient-primary flex items-center justify-center">
-      <p className="text-white">Loading...</p>
-    </div>;
+    return (
+      <div className="min-h-screen bg-gradient-primary flex items-center justify-center">
+        <p className="text-white">Loading...</p>
+      </div>
+    );
   }
 
   return (
     <>
-      {phase === "questionnaire" && (
-        <Questionnaire onComplete={handleQuestionnaireComplete} />
-      )}
-      {phase === "character" && questionnaireData && (
-        <CharacterCustomization onComplete={handleCharacterComplete} />
-      )}
+      {phase === "questionnaire" && <Questionnaire onComplete={handleQuestionnaireComplete} />}
+      {phase === "character" && questionnaireData && <CharacterCustomization onComplete={handleCharacterComplete} />}
       {phase === "game" && characterData && gameState && userId && (
-        <Game3D 
+        <Game3D
           characterData={characterData}
           initialGameState={gameState}
           userId={userId}
