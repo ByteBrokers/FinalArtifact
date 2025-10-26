@@ -77,30 +77,30 @@ const CharacterCustomization = ({ onComplete, initialData }: CharacterCustomizat
 
     // Torso (rectangular block) with pattern
     const torsoGeometry = new THREE.BoxGeometry(1.2, 1.8, 0.6);
-    
+
     // Create texture for shirt pattern
     let torsoMaterial;
     if (shirtPattern === "stripes") {
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       canvas.width = 128;
       canvas.height = 128;
-      const ctx = canvas.getContext('2d')!;
+      const ctx = canvas.getContext("2d")!;
       ctx.fillStyle = bodyColor;
       ctx.fillRect(0, 0, 128, 128);
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = "#ffffff";
       for (let i = 0; i < 128; i += 16) {
         ctx.fillRect(i, 0, 8, 128);
       }
       const texture = new THREE.CanvasTexture(canvas);
       torsoMaterial = new THREE.MeshLambertMaterial({ map: texture });
     } else if (shirtPattern === "dots") {
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       canvas.width = 128;
       canvas.height = 128;
-      const ctx = canvas.getContext('2d')!;
+      const ctx = canvas.getContext("2d")!;
       ctx.fillStyle = bodyColor;
       ctx.fillRect(0, 0, 128, 128);
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = "#ffffff";
       for (let x = 16; x < 128; x += 32) {
         for (let y = 16; y < 128; y += 32) {
           ctx.beginPath();
@@ -113,7 +113,7 @@ const CharacterCustomization = ({ onComplete, initialData }: CharacterCustomizat
     } else {
       torsoMaterial = new THREE.MeshLambertMaterial({ color: bodyColor });
     }
-    
+
     const torso = new THREE.Mesh(torsoGeometry, torsoMaterial);
     torso.position.y = 1.8;
     torso.userData.type = "torso";
@@ -128,17 +128,18 @@ const CharacterCustomization = ({ onComplete, initialData }: CharacterCustomizat
     character.add(head);
 
     // Eyes - different styles based on expression
-    const eyeGeometry = facialExpression === "wink" 
-      ? new THREE.BoxGeometry(0.15, 0.05, 0.05)
-      : facialExpression === "surprised"
-      ? new THREE.BoxGeometry(0.2, 0.2, 0.05)
-      : new THREE.BoxGeometry(0.15, 0.15, 0.05);
+    const eyeGeometry =
+      facialExpression === "wink"
+        ? new THREE.BoxGeometry(0.15, 0.05, 0.05)
+        : facialExpression === "surprised"
+          ? new THREE.BoxGeometry(0.2, 0.2, 0.05)
+          : new THREE.BoxGeometry(0.15, 0.15, 0.05);
     const eyeMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
     const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
     leftEye.position.set(-0.2, 3.15, 0.45);
     leftEye.userData.type = "eye";
     character.add(leftEye);
-    
+
     const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
     if (facialExpression === "wink") {
       rightEye.scale.y = 3;
@@ -162,10 +163,10 @@ const CharacterCustomization = ({ onComplete, initialData }: CharacterCustomizat
     } else {
       mouthGeometry = new THREE.BoxGeometry(0.3, 0.08, 0.05);
     }
-    
+
     const mouthMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
     const mouth = new THREE.Mesh(mouthGeometry, mouthMaterial);
-    
+
     if (facialExpression === "sad") {
       mouth.position.set(0, 2.8, 0.45);
       mouth.rotation.z = Math.PI;
@@ -258,7 +259,7 @@ const CharacterCustomization = ({ onComplete, initialData }: CharacterCustomizat
         <div className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="bodyColor" className="text-sm font-medium text-foreground">
-              Body Color
+              Clothing Colour
             </Label>
             <input
               type="color"
@@ -271,7 +272,7 @@ const CharacterCustomization = ({ onComplete, initialData }: CharacterCustomizat
 
           <div className="space-y-2">
             <Label htmlFor="skinColor" className="text-sm font-medium text-foreground">
-              Skin Color
+              Skin Colour
             </Label>
             <input
               type="color"
