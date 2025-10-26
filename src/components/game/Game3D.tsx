@@ -117,45 +117,18 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
       isDraggingRef.current = false;
     };
 
-    // const handleMouseMove = (e: MouseEvent) => {
-    //   if (!isDraggingRef.current) return;
-
-    //   const sensitivity = 0.005;
-    //   cameraRotationRef.current.yaw -= e.movementX * sensitivity;
-    //   cameraRotationRef.current.pitch -= e.movementY * sensitivity;
-
-    //   // Limit pitch to prevent going below ground and flipping
-    //   cameraRotationRef.current.pitch = Math.max(
-    //     -Math.PI / 3, // Don't go below ground
-    //     Math.min(Math.PI / 2.5, cameraRotationRef.current.pitch), // Don't flip over
-    //   );
-    // };
-
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDraggingRef.current) return;
 
       const sensitivity = 0.005;
+      cameraRotationRef.current.yaw -= e.movementX * sensitivity;
+      cameraRotationRef.current.pitch -= e.movementY * sensitivity;
 
-      // --- YAW ---
-      let yaw = cameraRotationRef.current.yaw - e.movementX * sensitivity;
-
-      // keep yaw in [-PI, PI] to avoid float drift
-      yaw = THREE.MathUtils.euclideanModulo(yaw + Math.PI, Math.PI * 2) - Math.PI;
-      cameraRotationRef.current.yaw = yaw;
-
-      // --- PITCH with dynamic lower bound so camera can't go under ground ---
-      const groundY = ground.position.y; // (0 unless you moved the plane)
-      const playerY = playerRef.current.position.y;
-      const cameraPad = 0.25; // keep lens slightly above the ground
-      const maxPitch = Math.PI * 0.49; // ~88° up; avoids flip
-
-      // Value for asin, clamped to [-1, 1] for numerical safety
-      const asinArg = (groundY + cameraPad - playerY - cameraHeight) / cameraDistance;
-      const minPitchFromGround = Math.asin(THREE.MathUtils.clamp(asinArg, -1, 1));
-
-      // Apply input then clamp between the dynamic min and a safe max
-      const desiredPitch = cameraRotationRef.current.pitch - e.movementY * sensitivity;
-      cameraRotationRef.current.pitch = THREE.MathUtils.clamp(desiredPitch, minPitchFromGround, maxPitch);
+      // Limit pitch to prevent going below ground and flipping
+      cameraRotationRef.current.pitch = Math.max(
+        -Math.PI / 3, // Don't go below ground
+        Math.min(Math.PI / 2.5, cameraRotationRef.current.pitch), // Don't flip over
+      );
     };
 
     document.addEventListener("keydown", handleKeyDown);
