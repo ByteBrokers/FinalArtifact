@@ -66,7 +66,7 @@ const Index = () => {
               </li>
             </ul>
             <Button 
-              onClick={() => navigate("/game")} 
+              onClick={() => navigate("/auth?intent=sell")} 
               className="w-full mt-4"
               size="lg"
             >
@@ -106,7 +106,7 @@ const Index = () => {
               </li>
             </ul>
             <Button 
-              onClick={() => navigate("/buyer")} 
+              onClick={() => navigate("/auth?intent=buy")} 
               className="w-full mt-4"
               size="lg"
               variant="outline"

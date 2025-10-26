@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,14 +12,17 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const intent = searchParams.get("intent");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate("/");
+        const redirectPath = intent === "buy" ? "/buyer" : intent === "sell" ? "/game" : "/";
+        navigate(redirectPath);
       }
     });
-  }, [navigate]);
+  }, [navigate, intent]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +46,8 @@ const Auth = () => {
           password,
         });
         if (error) throw error;
-        navigate("/");
+        const redirectPath = intent === "buy" ? "/buyer" : intent === "sell" ? "/game" : "/";
+        navigate(redirectPath);
       }
     } catch (error: any) {
       toast.error(error.message || "Authentication failed");
