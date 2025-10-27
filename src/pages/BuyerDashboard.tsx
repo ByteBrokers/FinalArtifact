@@ -56,6 +56,8 @@ const BuyerDashboard = () => {
   });
   const [showSurveyCreator, setShowSurveyCreator] = useState(false);
   const [surveys, setSurveys] = useState<any[]>([]);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
 
   useEffect(() => {
     checkAuth();
@@ -332,6 +334,43 @@ const BuyerDashboard = () => {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmation !== "DELETE") {
+      toast.error('Please type "DELETE" to confirm');
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Delete all user data from tables
+      const { data: surveyData } = await supabase
+        .from("buyer_surveys")
+        .select("id")
+        .eq("user_id", user.id);
+
+      if (surveyData && surveyData.length > 0) {
+        const surveyIds = surveyData.map(s => s.id);
+        await supabase.from("survey_questions").delete().in("survey_id", surveyIds);
+      }
+
+      await Promise.all([
+        supabase.from("buyer_surveys").delete().eq("user_id", user.id),
+        supabase.from("profiles").delete().eq("user_id", user.id),
+      ]);
+
+      toast.success("Account and all associated data deleted successfully");
+      
+      // Sign out and redirect
+      await supabase.auth.signOut();
+      navigate("/");
+    } catch (error) {
+      console.error("Delete account error:", error);
+      toast.error("Failed to delete account. Please try again or contact support.");
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -539,6 +578,31 @@ const BuyerDashboard = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Account Management Section */}
+        <Card className="border-destructive/50 bg-destructive/5">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-destructive">Danger Zone</CardTitle>
+            <CardDescription>Irreversible account actions</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium text-foreground">Delete Account</h4>
+                <p className="text-sm text-muted-foreground">
+                  Permanently delete your account and all associated data
+                </p>
+              </div>
+              <Button 
+                variant="destructive" 
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Account
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Shopping Cart Dialog */}
@@ -735,6 +799,55 @@ const BuyerDashboard = () => {
         onOpenChange={setShowSurveyCreator}
         onSurveyCreated={loadSurveys}
       />
+
+      {/* Delete Account Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-destructive">Delete Account</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. This will permanently delete your account and remove all of your data from our servers.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="deleteConfirm">Type "DELETE" to confirm</Label>
+              <Input
+                id="deleteConfirm"
+                value={deleteConfirmation}
+                onChange={(e) => setDeleteConfirmation(e.target.value)}
+                placeholder="DELETE"
+              />
+            </div>
+
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 space-y-2">
+              <p className="text-sm font-semibold text-destructive">This will delete:</p>
+              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                <li>All created surveys and questions</li>
+                <li>Profile information</li>
+                <li>Your account permanently</li>
+              </ul>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowDeleteDialog(false);
+              setDeleteConfirmation("");
+            }}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteAccount}
+              disabled={deleteConfirmation !== "DELETE"}
+            >
+              Delete Account Permanently
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

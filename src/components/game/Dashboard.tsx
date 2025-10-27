@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, Legend } from "recharts";
-import { X, TrendingUp, Calendar, Coins, Edit, Wallet, FileText, Building2, Package, Trophy, DollarSign } from "lucide-react";
+import { X, TrendingUp, Calendar, Coins, Edit, Wallet, FileText, Building2, Package, Trophy, DollarSign, Trash2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -91,6 +91,8 @@ const Dashboard = ({ userId, characterData, onClose, onEditCharacter, onUpdateIn
     bankAccount: "",
     email: "",
   });
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
 
   useEffect(() => {
     loadDashboardData();
@@ -294,6 +296,34 @@ const Dashboard = ({ userId, characterData, onClose, onEditCharacter, onUpdateIn
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmation !== "DELETE") {
+      toast.error('Please type "DELETE" to confirm');
+      return;
+    }
+
+    try {
+      // Delete all user data from tables
+      await Promise.all([
+        supabase.from("earnings_history").delete().eq("user_id", userId),
+        supabase.from("business_surveys").delete().eq("user_id", userId),
+        supabase.from("game_state").delete().eq("user_id", userId),
+        supabase.from("character_customization").delete().eq("user_id", userId),
+        supabase.from("questionnaire_responses").delete().eq("user_id", userId),
+        supabase.from("profiles").delete().eq("user_id", userId),
+      ]);
+
+      toast.success("Account and all associated data deleted successfully");
+      
+      // Sign out and redirect
+      await supabase.auth.signOut();
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Delete account error:", error);
+      toast.error("Failed to delete account. Please try again or contact support.");
+    }
+  };
+
   return (
     <>
       <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-xl flex items-center justify-center p-4">
@@ -310,6 +340,14 @@ const Dashboard = ({ userId, characterData, onClose, onEditCharacter, onUpdateIn
               >
                 <FileText className="h-4 w-4 mr-2" />
                 Update Information
+              </Button>
+              <Button 
+                onClick={() => setShowDeleteDialog(true)} 
+                variant="destructive" 
+                size="sm"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Account
               </Button>
               <Button onClick={onClose} variant="ghost" size="icon" className="rounded-full">
                 <X className="h-5 w-5" />
@@ -879,9 +917,60 @@ const Dashboard = ({ userId, characterData, onClose, onEditCharacter, onUpdateIn
           <Button onClick={handleWithdrawal}>
             Submit Withdrawal Request
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Account Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-destructive">Delete Account</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. This will permanently delete your account and remove all of your data from our servers.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="deleteConfirm">Type "DELETE" to confirm</Label>
+              <Input
+                id="deleteConfirm"
+                value={deleteConfirmation}
+                onChange={(e) => setDeleteConfirmation(e.target.value)}
+                placeholder="DELETE"
+              />
+            </div>
+
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 space-y-2">
+              <p className="text-sm font-semibold text-destructive">This will delete:</p>
+              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                <li>All earnings history</li>
+                <li>All survey responses</li>
+                <li>Game progress and character data</li>
+                <li>Profile information</li>
+                <li>Your account permanently</li>
+              </ul>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowDeleteDialog(false);
+              setDeleteConfirmation("");
+            }}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteAccount}
+              disabled={deleteConfirmation !== "DELETE"}
+            >
+              Delete Account Permanently
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
