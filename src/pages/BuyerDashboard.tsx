@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Package, Clock, DollarSign, TrendingUp, Users, ShoppingCart, Trash2, CreditCard } from "lucide-react";
+import { ArrowLeft, Package, Clock, DollarSign, TrendingUp, Users, ShoppingCart, Trash2, CreditCard, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { SurveyCreator } from "@/components/buyer/SurveyCreator";
 
 interface DataListing {
   dataType: string;
@@ -53,10 +54,13 @@ const BuyerDashboard = () => {
     contactEmail: "",
     businessAddress: "",
   });
+  const [showSurveyCreator, setShowSurveyCreator] = useState(false);
+  const [surveys, setSurveys] = useState<any[]>([]);
 
   useEffect(() => {
     checkAuth();
     loadBuyerData();
+    loadSurveys();
   }, []);
 
   const checkAuth = async () => {
@@ -310,6 +314,24 @@ const BuyerDashboard = () => {
     setCheckoutDetails({ companyName: "", contactEmail: "", businessAddress: "" });
   };
 
+  const loadSurveys = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("buyer_surveys")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setSurveys(data || []);
+    } catch (error) {
+      console.error("Error loading surveys:", error);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -342,6 +364,13 @@ const BuyerDashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <Button 
+                onClick={() => setShowSurveyCreator(true)} 
+                variant="outline"
+              >
+                <FileText className="h-5 w-5 mr-2" />
+                Create Survey
+              </Button>
               <Button 
                 onClick={() => setShowCart(true)} 
                 variant="outline"
@@ -699,6 +728,13 @@ const BuyerDashboard = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Survey Creator Dialog */}
+      <SurveyCreator 
+        open={showSurveyCreator} 
+        onOpenChange={setShowSurveyCreator}
+        onSurveyCreated={loadSurveys}
+      />
     </div>
   );
 };

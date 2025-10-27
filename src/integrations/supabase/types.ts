@@ -38,6 +38,33 @@ export type Database = {
         }
         Relationships: []
       }
+      buyer_surveys: {
+        Row: {
+          created_at: string
+          id: string
+          payment_amount: number
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payment_amount: number
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payment_amount?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       character_customization: {
         Row: {
           body_color: string
@@ -224,6 +251,44 @@ export type Database = {
         }
         Relationships: []
       }
+      survey_questions: {
+        Row: {
+          created_at: string
+          id: string
+          options: Json | null
+          order_index: number
+          question_text: string
+          question_type: Database["public"]["Enums"]["question_type"]
+          survey_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          options?: Json | null
+          order_index: number
+          question_text: string
+          question_type: Database["public"]["Enums"]["question_type"]
+          survey_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          options?: Json | null
+          order_index?: number
+          question_text?: string
+          question_type?: Database["public"]["Enums"]["question_type"]
+          survey_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_questions_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "buyer_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -232,7 +297,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      question_type: "short_answer" | "long_answer" | "multi_choice"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -359,6 +424,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      question_type: ["short_answer", "long_answer", "multi_choice"],
+    },
   },
 } as const
