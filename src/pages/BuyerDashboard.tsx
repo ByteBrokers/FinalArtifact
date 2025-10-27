@@ -587,9 +587,8 @@ const BuyerDashboard = () => {
 
         {/* Account Management Section */}
         <Card className="border-destructive/50 bg-destructive/5">
-          <CardHeader></CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between pt-6">
               <div>
                 <h4 className="font-medium text-foreground">Delete Account</h4>
                 <p className="text-sm text-muted-foreground">Permanently delete your account and all associated data</p>
