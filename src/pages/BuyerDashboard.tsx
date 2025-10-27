@@ -587,6 +587,7 @@ const BuyerDashboard = () => {
 
         {/* Account Management Section */}
         <Card className="border-destructive/50 bg-destructive/5">
+          <CardHeader></CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
