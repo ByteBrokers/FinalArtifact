@@ -6,9 +6,27 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Package, Clock, DollarSign, TrendingUp, Users, ShoppingCart, Trash2, CreditCard, FileText } from "lucide-react";
+import {
+  ArrowLeft,
+  Package,
+  Clock,
+  DollarSign,
+  TrendingUp,
+  Users,
+  ShoppingCart,
+  Trash2,
+  CreditCard,
+  FileText,
+} from "lucide-react";
 import { toast } from "sonner";
 import { SurveyCreator } from "@/components/buyer/SurveyCreator";
 
@@ -66,7 +84,9 @@ const BuyerDashboard = () => {
   }, []);
 
   const checkAuth = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       navigate("/auth");
     }
@@ -75,9 +95,7 @@ const BuyerDashboard = () => {
   const loadBuyerData = async () => {
     try {
       // Get all game states to see available data
-      const { data: gameStates, error: gameError } = await supabase
-        .from("game_state")
-        .select("data_types, user_id");
+      const { data: gameStates, error: gameError } = await supabase.from("game_state").select("data_types, user_id");
 
       if (gameError) throw gameError;
 
@@ -91,25 +109,31 @@ const BuyerDashboard = () => {
       if (earningsError) throw earningsError;
 
       // Process data for listings
-      const dataTypeMap = new Map<string, { count: number; prices: number[]; lastUpdated: Date; sellers: Set<string> }>();
+      const dataTypeMap = new Map<
+        string,
+        { count: number; prices: number[]; lastUpdated: Date; sellers: Set<string> }
+      >();
 
       // Aggregate data from game states
       gameStates?.forEach((state) => {
-        const dataTypes = state.data_types as Record<string, { owned: boolean; value: number; lastCollectedTime?: number }>;
+        const dataTypes = state.data_types as Record<
+          string,
+          { owned: boolean; value: number; lastCollectedTime?: number }
+        >;
         Object.entries(dataTypes).forEach(([type, data]) => {
           if (data.owned) {
             if (!dataTypeMap.has(type)) {
-              dataTypeMap.set(type, { 
-                count: 0, 
-                prices: [], 
+              dataTypeMap.set(type, {
+                count: 0,
+                prices: [],
                 lastUpdated: new Date(0),
-                sellers: new Set()
+                sellers: new Set(),
               });
             }
             const existing = dataTypeMap.get(type)!;
             existing.count++;
             existing.sellers.add(state.user_id);
-            
+
             if (data.lastCollectedTime) {
               const updateTime = new Date(data.lastCollectedTime);
               if (updateTime > existing.lastUpdated) {
@@ -128,15 +152,16 @@ const BuyerDashboard = () => {
       });
 
       // Convert to listings array
-      let listings: DataListing[] = Array.from(dataTypeMap.entries()).map(([type, data]) => ({
-        dataType: type,
-        totalAvailable: data.count,
-        averagePrice: data.prices.length > 0 
-          ? Math.round(data.prices.reduce((a, b) => a + b, 0) / data.prices.length)
-          : 0,
-        lastUpdated: data.lastUpdated.toISOString(),
-        sellers: data.sellers.size,
-      })).sort((a, b) => b.totalAvailable - a.totalAvailable);
+      let listings: DataListing[] = Array.from(dataTypeMap.entries())
+        .map(([type, data]) => ({
+          dataType: type,
+          totalAvailable: data.count,
+          averagePrice:
+            data.prices.length > 0 ? Math.round(data.prices.reduce((a, b) => a + b, 0) / data.prices.length) : 0,
+          lastUpdated: data.lastUpdated.toISOString(),
+          sellers: data.sellers.size,
+        }))
+        .sort((a, b) => b.totalAvailable - a.totalAvailable);
 
       // If no data is available, show default sample data
       if (listings.length === 0) {
@@ -187,12 +212,13 @@ const BuyerDashboard = () => {
       }
 
       // Process recent transactions
-      let transactions: RecentTransaction[] = earnings?.map((e) => ({
-        dataType: e.data_type,
-        price: e.amount,
-        timestamp: e.created_at,
-        company: e.company_name,
-      })) || [];
+      let transactions: RecentTransaction[] =
+        earnings?.map((e) => ({
+          dataType: e.data_type,
+          price: e.amount,
+          timestamp: e.created_at,
+          company: e.company_name,
+        })) || [];
 
       // If no transactions, show sample transactions
       if (transactions.length === 0 && listings.length > 0) {
@@ -227,7 +253,7 @@ const BuyerDashboard = () => {
       setDataListings(listings);
       setRecentTransactions(transactions);
       setTotalDataPoints(listings.reduce((sum, l) => sum + l.totalAvailable, 0));
-      setTotalSellers(new Set(gameStates?.map(s => s.user_id)).size);
+      setTotalSellers(new Set(gameStates?.map((s) => s.user_id)).size);
     } catch (error) {
       console.error("Error loading buyer data:", error);
       toast.error("Failed to load data listings");
@@ -255,25 +281,26 @@ const BuyerDashboard = () => {
   };
 
   const addToCart = (listing: DataListing) => {
-    const existingItem = cart.find(item => item.dataType === listing.dataType);
+    const existingItem = cart.find((item) => item.dataType === listing.dataType);
     if (existingItem) {
-      setCart(cart.map(item =>
-        item.dataType === listing.dataType
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      ));
+      setCart(
+        cart.map((item) => (item.dataType === listing.dataType ? { ...item, quantity: item.quantity + 1 } : item)),
+      );
     } else {
-      setCart([...cart, {
-        dataType: listing.dataType,
-        quantity: 1,
-        pricePerUnit: listing.averagePrice,
-      }]);
+      setCart([
+        ...cart,
+        {
+          dataType: listing.dataType,
+          quantity: 1,
+          pricePerUnit: listing.averagePrice,
+        },
+      ]);
     }
     toast.success(`Added ${listing.dataType} to cart`);
   };
 
   const removeFromCart = (dataType: string) => {
-    setCart(cart.filter(item => item.dataType !== dataType));
+    setCart(cart.filter((item) => item.dataType !== dataType));
     toast.success("Removed from cart");
   };
 
@@ -282,13 +309,11 @@ const BuyerDashboard = () => {
       removeFromCart(dataType);
       return;
     }
-    setCart(cart.map(item =>
-      item.dataType === dataType ? { ...item, quantity } : item
-    ));
+    setCart(cart.map((item) => (item.dataType === dataType ? { ...item, quantity } : item)));
   };
 
   const getTotalCost = () => {
-    return cart.reduce((sum, item) => sum + (item.quantity * item.pricePerUnit), 0);
+    return cart.reduce((sum, item) => sum + item.quantity * item.pricePerUnit, 0);
   };
 
   const getTotalItems = () => {
@@ -308,8 +333,10 @@ const BuyerDashboard = () => {
       toast.error("Please fill in all fields");
       return;
     }
-    
-    toast.success(`Purchase request submitted for ${getTotalItems()} data items (${getTotalCost()} coins). This is a demo - no actual transaction was processed.`);
+
+    toast.success(
+      `Purchase request submitted for ${getTotalItems()} data items (${getTotalCost()} coins). This is a demo - no actual transaction was processed.`,
+    );
     setCart([]);
     setShowCheckout(false);
     setShowCart(false);
@@ -318,7 +345,9 @@ const BuyerDashboard = () => {
 
   const loadSurveys = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       const { data, error } = await supabase
@@ -341,17 +370,16 @@ const BuyerDashboard = () => {
     }
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       // Delete all user data from tables
-      const { data: surveyData } = await supabase
-        .from("buyer_surveys")
-        .select("id")
-        .eq("user_id", user.id);
+      const { data: surveyData } = await supabase.from("buyer_surveys").select("id").eq("user_id", user.id);
 
       if (surveyData && surveyData.length > 0) {
-        const surveyIds = surveyData.map(s => s.id);
+        const surveyIds = surveyData.map((s) => s.id);
         await supabase.from("survey_questions").delete().in("survey_id", surveyIds);
       }
 
@@ -361,7 +389,7 @@ const BuyerDashboard = () => {
       ]);
 
       toast.success("Account and all associated data deleted successfully");
-      
+
       // Sign out and redirect
       await supabase.auth.signOut();
       navigate("/");
@@ -389,12 +417,7 @@ const BuyerDashboard = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate("/")}
-                className="rounded-full"
-              >
+              <Button variant="ghost" size="icon" onClick={() => navigate("/")} className="rounded-full">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
@@ -403,18 +426,11 @@ const BuyerDashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button 
-                onClick={() => setShowSurveyCreator(true)} 
-                variant="outline"
-              >
+              <Button onClick={() => setShowSurveyCreator(true)} variant="outline">
                 <FileText className="h-5 w-5 mr-2" />
                 Create Survey
               </Button>
-              <Button 
-                onClick={() => setShowCart(true)} 
-                variant="outline"
-                className="relative"
-              >
+              <Button onClick={() => setShowCart(true)} variant="outline" className="relative">
                 <ShoppingCart className="h-5 w-5 mr-2" />
                 Cart
                 {cart.length > 0 && (
@@ -500,23 +516,17 @@ const BuyerDashboard = () => {
                       <TableCell className="text-center">
                         <Badge variant="secondary">{listing.totalAvailable}</Badge>
                       </TableCell>
-                      <TableCell className="text-center text-muted-foreground">
-                        {listing.sellers}
-                      </TableCell>
+                      <TableCell className="text-center text-muted-foreground">{listing.sellers}</TableCell>
                       <TableCell className="text-right font-semibold text-primary">
-                        {listing.averagePrice > 0 ? `${listing.averagePrice} coins` : 'N/A'}
+                        {listing.averagePrice > 0 ? `${listing.averagePrice} coins` : "N/A"}
                       </TableCell>
                       <TableCell className="text-right text-muted-foreground text-sm">
-                        {listing.lastUpdated !== new Date(0).toISOString() 
+                        {listing.lastUpdated !== new Date(0).toISOString()
                           ? formatDate(listing.lastUpdated)
-                          : 'Unknown'}
+                          : "Unknown"}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button 
-                          size="sm" 
-                          onClick={() => addToCart(listing)}
-                          disabled={listing.averagePrice === 0}
-                        >
+                        <Button size="sm" onClick={() => addToCart(listing)} disabled={listing.averagePrice === 0}>
                           <ShoppingCart className="h-4 w-4 mr-1" />
                           Add to Cart
                         </Button>
@@ -546,7 +556,7 @@ const BuyerDashboard = () => {
             {recentTransactions.length > 0 ? (
               <div className="space-y-3">
                 {recentTransactions.map((transaction, index) => (
-                  <div 
+                  <div
                     key={index}
                     className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors"
                   >
@@ -564,39 +574,26 @@ const BuyerDashboard = () => {
                         <DollarSign className="h-4 w-4" />
                         {transaction.price} coins
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatDate(transaction.timestamp)}
-                      </p>
+                      <p className="text-xs text-muted-foreground">{formatDate(transaction.timestamp)}</p>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="h-32 flex items-center justify-center text-muted-foreground">
-                No recent transactions
-              </div>
+              <div className="h-32 flex items-center justify-center text-muted-foreground">No recent transactions</div>
             )}
           </CardContent>
         </Card>
 
         {/* Account Management Section */}
         <Card className="border-destructive/50 bg-destructive/5">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-destructive">Danger Zone</CardTitle>
-            <CardDescription>Irreversible account actions</CardDescription>
-          </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-medium text-foreground">Delete Account</h4>
-                <p className="text-sm text-muted-foreground">
-                  Permanently delete your account and all associated data
-                </p>
+                <p className="text-sm text-muted-foreground">Permanently delete your account and all associated data</p>
               </div>
-              <Button 
-                variant="destructive" 
-                onClick={() => setShowDeleteDialog(true)}
-              >
+              <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete Account
               </Button>
@@ -613,16 +610,12 @@ const BuyerDashboard = () => {
               <ShoppingCart className="h-5 w-5 text-primary" />
               Shopping Cart
             </DialogTitle>
-            <DialogDescription>
-              Review your selected data items before checkout
-            </DialogDescription>
+            <DialogDescription>Review your selected data items before checkout</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             {cart.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                Your cart is empty
-              </div>
+              <div className="text-center py-12 text-muted-foreground">Your cart is empty</div>
             ) : (
               <>
                 <div className="space-y-3">
@@ -632,9 +625,7 @@ const BuyerDashboard = () => {
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
                             <h4 className="font-medium text-foreground">{item.dataType}</h4>
-                            <p className="text-sm text-muted-foreground">
-                              {item.pricePerUnit} coins per unit
-                            </p>
+                            <p className="text-sm text-muted-foreground">{item.pricePerUnit} coins per unit</p>
                           </div>
                           <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2">
@@ -655,15 +646,9 @@ const BuyerDashboard = () => {
                               </Button>
                             </div>
                             <div className="text-right min-w-[80px]">
-                              <p className="font-semibold text-primary">
-                                {item.quantity * item.pricePerUnit} coins
-                              </p>
+                              <p className="font-semibold text-primary">{item.quantity * item.pricePerUnit} coins</p>
                             </div>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => removeFromCart(item.dataType)}
-                            >
+                            <Button size="sm" variant="ghost" onClick={() => removeFromCart(item.dataType)}>
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                           </div>
@@ -718,9 +703,7 @@ const BuyerDashboard = () => {
               <CreditCard className="h-5 w-5 text-primary" />
               Complete Purchase
             </DialogTitle>
-            <DialogDescription>
-              Enter your business details to complete the purchase
-            </DialogDescription>
+            <DialogDescription>Enter your business details to complete the purchase</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
@@ -786,19 +769,13 @@ const BuyerDashboard = () => {
             <Button variant="outline" onClick={() => setShowCheckout(false)}>
               Cancel
             </Button>
-            <Button onClick={handleCompleteCheckout}>
-              Complete Purchase
-            </Button>
+            <Button onClick={handleCompleteCheckout}>Complete Purchase</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Survey Creator Dialog */}
-      <SurveyCreator 
-        open={showSurveyCreator} 
-        onOpenChange={setShowSurveyCreator}
-        onSurveyCreated={loadSurveys}
-      />
+      <SurveyCreator open={showSurveyCreator} onOpenChange={setShowSurveyCreator} onSurveyCreated={loadSurveys} />
 
       {/* Delete Account Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
@@ -806,10 +783,11 @@ const BuyerDashboard = () => {
           <DialogHeader>
             <DialogTitle className="text-destructive">Delete Account</DialogTitle>
             <DialogDescription>
-              This action cannot be undone. This will permanently delete your account and remove all of your data from our servers.
+              This action cannot be undone. This will permanently delete your account and remove all of your data from
+              our servers.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="deleteConfirm">Type "DELETE" to confirm</Label>
@@ -832,17 +810,16 @@ const BuyerDashboard = () => {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => {
-              setShowDeleteDialog(false);
-              setDeleteConfirmation("");
-            }}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteDialog(false);
+                setDeleteConfirmation("");
+              }}
+            >
               Cancel
             </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleDeleteAccount}
-              disabled={deleteConfirmation !== "DELETE"}
-            >
+            <Button variant="destructive" onClick={handleDeleteAccount} disabled={deleteConfirmation !== "DELETE"}>
               Delete Account Permanently
             </Button>
           </DialogFooter>
