@@ -104,6 +104,10 @@ const Dashboard = ({ userId, characterData, onClose, onEditCharacter, onUpdateIn
     }
   }, [openWithdrawal]);
 
+  const coinsToNZD = (coins: number) => {
+    return (coins / 50).toFixed(2);
+  };
+
   const loadDashboardData = async () => {
     // Get total earnings
     const { data: allEarnings } = await supabase
@@ -283,7 +287,7 @@ const Dashboard = ({ userId, characterData, onClose, onEditCharacter, onUpdateIn
           data_type: "Bank Transfer",
         });
 
-      toast.success(`Withdrawal request submitted! You will receive ${withdrawalAmount} NZD to your account.`);
+      toast.success(`Withdrawal request submitted! You will receive $${coinsToNZD(withdrawnAmount)} NZD to your account.`);
       setShowWithdrawalDialog(false);
       setWithdrawalAmount("");
       setWithdrawalDetails({ fullName: "", bankAccount: "", email: "" });
@@ -500,7 +504,7 @@ const Dashboard = ({ userId, characterData, onClose, onEditCharacter, onUpdateIn
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-foreground">{totalEarnings}</div>
+                <div className="text-2xl font-bold text-foreground">${coinsToNZD(totalEarnings)} NZD</div>
                 <p className="text-xs text-muted-foreground mt-1">All time revenue</p>
                 <Button 
                   onClick={() => setShowWithdrawalDialog(true)}
@@ -521,7 +525,7 @@ const Dashboard = ({ userId, characterData, onClose, onEditCharacter, onUpdateIn
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-foreground">{monthlyEarnings}</div>
+                <div className="text-2xl font-bold text-foreground">${coinsToNZD(monthlyEarnings)} NZD</div>
                 <p className="text-xs text-muted-foreground mt-1">Last 30 days</p>
               </CardContent>
             </Card>
@@ -726,16 +730,16 @@ const Dashboard = ({ userId, characterData, onClose, onEditCharacter, onUpdateIn
                           );
                         })}
                       </Pie>
-                      <Tooltip 
-                        contentStyle={{
-                          backgroundColor: "hsl(var(--card))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "0.75rem",
-                          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                        }}
-                        labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
-                        formatter={(value, name) => [`${value} coins`, name]}
-                      />
+                       <Tooltip 
+                         contentStyle={{
+                           backgroundColor: "hsl(var(--card))",
+                           border: "1px solid hsl(var(--border))",
+                           borderRadius: "0.75rem",
+                           boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                         }}
+                         labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
+                         formatter={(value: number, name: string) => [`$${coinsToNZD(value)} NZD`, name]}
+                       />
                       <Legend 
                         verticalAlign="bottom"
                         align="center"
@@ -800,8 +804,8 @@ const Dashboard = ({ userId, characterData, onClose, onEditCharacter, onUpdateIn
                         </TableCell>
                         <TableCell className="font-medium">{item.name}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">{item.bestCompany}</TableCell>
-                        <TableCell className="text-right text-muted-foreground">{item.value}</TableCell>
-                        <TableCell className="text-right font-semibold text-primary">{item.potentialEarnings}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">${coinsToNZD(item.value)} NZD</TableCell>
+                        <TableCell className="text-right font-semibold text-primary">${coinsToNZD(item.potentialEarnings)} NZD</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -842,7 +846,7 @@ const Dashboard = ({ userId, characterData, onClose, onEditCharacter, onUpdateIn
                   </div>
                   <div className="flex justify-between items-center pt-2 border-t border-border/50">
                     <span className="text-xs text-muted-foreground">Conversion Rate</span>
-                    <span className="text-sm font-semibold text-primary">1 coin = 1 NZD</span>
+                    <span className="text-sm font-semibold text-primary">50 coins = $1 NZD</span>
                   </div>
                 </div>
               </CardContent>
@@ -863,7 +867,7 @@ const Dashboard = ({ userId, characterData, onClose, onEditCharacter, onUpdateIn
             />
             {withdrawalAmount && (
               <p className="text-sm text-muted-foreground">
-                You will receive: <span className="font-semibold text-primary">{withdrawalAmount} NZD</span>
+                You will receive: <span className="font-semibold text-primary">${coinsToNZD(parseFloat(withdrawalAmount))} NZD</span>
               </p>
             )}
           </div>

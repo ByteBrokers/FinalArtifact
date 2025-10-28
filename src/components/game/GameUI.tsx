@@ -25,6 +25,10 @@ const GameUI = ({
   const [balanceExpanded, setBalanceExpanded] = useState(false);
   const [controlsExpanded, setControlsExpanded] = useState(false);
 
+  const coinsToNZD = (coins: number) => {
+    return (coins / 50).toFixed(2);
+  };
+
   return (
     <>
       <div className="absolute top-4 left-4 bg-card/95 backdrop-blur-xl border border-border shadow-xl rounded-2xl p-4 min-w-[200px] z-50">
@@ -32,7 +36,7 @@ const GameUI = ({
           <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-lg">💰</div>
           <div className="flex-1">
             <div className="text-xs text-muted-foreground font-medium">Balance</div>
-            <div className="text-xl font-bold text-foreground">{gameState.coins}</div>
+            <div className="text-xl font-bold text-foreground">${coinsToNZD(gameState.coins)} NZD</div>
           </div>
           <button
             onClick={() => setBalanceExpanded(!balanceExpanded)}
