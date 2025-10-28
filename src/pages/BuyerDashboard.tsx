@@ -163,7 +163,7 @@ const BuyerDashboard = () => {
         }))
         .sort((a, b) => b.totalAvailable - a.totalAvailable);
 
-      // If no data is available, show default sample data
+      // If no data is available, show default sample data (prices in coins)
       if (listings.length === 0) {
         listings = [
           {
@@ -220,7 +220,7 @@ const BuyerDashboard = () => {
           company: e.company_name,
         })) || [];
 
-      // If no transactions, show sample transactions
+      // If no transactions, show sample transactions (prices in coins)
       if (transactions.length === 0 && listings.length > 0) {
         transactions = [
           {
@@ -280,6 +280,10 @@ const BuyerDashboard = () => {
     return `${diffDays}d ago`;
   };
 
+  const coinsToNZD = (coins: number) => {
+    return (coins / 50).toFixed(2);
+  };
+
   const addToCart = (listing: DataListing) => {
     const existingItem = cart.find((item) => item.dataType === listing.dataType);
     if (existingItem) {
@@ -335,7 +339,7 @@ const BuyerDashboard = () => {
     }
 
     toast.success(
-      `Purchase request submitted for ${getTotalItems()} data items (${getTotalCost()} coins). This is a demo - no actual transaction was processed.`,
+      `Purchase request submitted for ${getTotalItems()} data items ($${coinsToNZD(getTotalCost())} NZD). This is a demo - no actual transaction was processed.`,
     );
     setCart([]);
     setShowCheckout(false);
@@ -518,7 +522,7 @@ const BuyerDashboard = () => {
                       </TableCell>
                       <TableCell className="text-center text-muted-foreground">{listing.sellers}</TableCell>
                       <TableCell className="text-right font-semibold text-primary">
-                        {listing.averagePrice > 0 ? `${listing.averagePrice} coins` : "N/A"}
+                        {listing.averagePrice > 0 ? `$${coinsToNZD(listing.averagePrice)} NZD` : "N/A"}
                       </TableCell>
                       <TableCell className="text-right text-muted-foreground text-sm">
                         {listing.lastUpdated !== new Date(0).toISOString()
@@ -572,7 +576,7 @@ const BuyerDashboard = () => {
                     <div className="text-right">
                       <p className="font-semibold text-primary flex items-center gap-1 justify-end">
                         <DollarSign className="h-4 w-4" />
-                        {transaction.price} coins
+                        ${coinsToNZD(transaction.price)} NZD
                       </p>
                       <p className="text-xs text-muted-foreground">{formatDate(transaction.timestamp)}</p>
                     </div>
@@ -625,7 +629,7 @@ const BuyerDashboard = () => {
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
                             <h4 className="font-medium text-foreground">{item.dataType}</h4>
-                            <p className="text-sm text-muted-foreground">{item.pricePerUnit} coins per unit</p>
+                            <p className="text-sm text-muted-foreground">${coinsToNZD(item.pricePerUnit)} NZD per unit</p>
                           </div>
                           <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2">
@@ -646,7 +650,7 @@ const BuyerDashboard = () => {
                               </Button>
                             </div>
                             <div className="text-right min-w-[80px]">
-                              <p className="font-semibold text-primary">{item.quantity * item.pricePerUnit} coins</p>
+                              <p className="font-semibold text-primary">${coinsToNZD(item.quantity * item.pricePerUnit)} NZD</p>
                             </div>
                             <Button size="sm" variant="ghost" onClick={() => removeFromCart(item.dataType)}>
                               <Trash2 className="h-4 w-4 text-destructive" />
@@ -664,16 +668,16 @@ const BuyerDashboard = () => {
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Subtotal ({getTotalItems()} items)</span>
-                        <span className="font-medium">{getTotalCost()} coins</span>
+                        <span className="font-medium">${coinsToNZD(getTotalCost())} NZD</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Processing Fee</span>
-                        <span className="font-medium">0 coins</span>
+                        <span className="font-medium">$0.00 NZD</span>
                       </div>
                       <div className="border-t border-border pt-2 mt-2">
                         <div className="flex justify-between">
                           <span className="font-semibold text-foreground">Total</span>
-                          <span className="text-xl font-bold text-primary">{getTotalCost()} coins</span>
+                          <span className="text-xl font-bold text-primary">${coinsToNZD(getTotalCost())} NZD</span>
                         </div>
                       </div>
                     </div>
@@ -717,7 +721,7 @@ const BuyerDashboard = () => {
                   </div>
                   <div className="flex justify-between items-center pt-2 border-t border-border/50">
                     <span className="text-sm text-muted-foreground">Total Cost</span>
-                    <span className="text-lg font-bold text-primary">{getTotalCost()} coins</span>
+                    <span className="text-lg font-bold text-primary">${coinsToNZD(getTotalCost())} NZD</span>
                   </div>
                 </div>
               </CardContent>
