@@ -3,9 +3,33 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShoppingCart, TrendingUp } from "lucide-react";
 import logoImage from "@/assets/bytebrokerslogo1.png";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const navigate = useNavigate();
+
+  const handleStartSelling = async () => {
+    // Check if user is logged in and has completed survey
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session) {
+      // Check if user has completed questionnaire
+      const { data: questionnaireData } = await supabase
+        .from("questionnaire_responses")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+      
+      if (questionnaireData) {
+        // User is logged in and has completed survey - go straight to game
+        navigate("/game");
+        return;
+      }
+    }
+    
+    // Otherwise, go to auth page
+    navigate("/auth?intent=sell");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-primary/20 relative overflow-hidden flex flex-col items-center justify-center p-6">
@@ -61,7 +85,7 @@ const Index = () => {
                   Track earnings and withdraw funds
                 </li>
               </ul>
-              <Button onClick={() => navigate("/auth?intent=sell")} className="w-full mt-4" size="lg">
+              <Button onClick={handleStartSelling} className="w-full mt-4" size="lg">
                 Start Selling
               </Button>
             </CardContent>
