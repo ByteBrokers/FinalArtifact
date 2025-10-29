@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -59,6 +60,7 @@ interface CheckoutDetails {
 
 const BuyerDashboard = () => {
   const navigate = useNavigate();
+  const { user, isLoading: authLoading } = useAuth();
   const [dataListings, setDataListings] = useState<DataListing[]>([]);
   const [recentTransactions, setRecentTransactions] = useState<RecentTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -78,19 +80,17 @@ const BuyerDashboard = () => {
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
 
   useEffect(() => {
-    checkAuth();
-    loadBuyerData();
-    loadSurveys();
-  }, []);
-
-  const checkAuth = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
+    if (!authLoading && !user) {
       navigate("/auth");
     }
-  };
+  }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    if (user) {
+      loadBuyerData();
+      loadSurveys();
+    }
+  }, [user]);
 
   const loadBuyerData = async () => {
     try {
@@ -348,12 +348,8 @@ const BuyerDashboard = () => {
   };
 
   const loadSurveys = async () => {
+    if (!user) return;
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
-
       const { data, error } = await supabase
         .from("buyer_surveys")
         .select("*")
@@ -373,12 +369,9 @@ const BuyerDashboard = () => {
       return;
     }
 
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
+    if (!user) return;
 
+    try {
       // Delete all user data from tables
       const { data: surveyData } = await supabase.from("buyer_surveys").select("id").eq("user_id", user.id);
 
@@ -403,7 +396,7 @@ const BuyerDashboard = () => {
     }
   };
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">

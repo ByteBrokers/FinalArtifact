@@ -3,32 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShoppingCart, TrendingUp } from "lucide-react";
 import logoImage from "@/assets/bytebrokerslogo1.png";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user, hasCompletedQuestionnaire } = useAuth();
 
-  const handleStartSelling = async () => {
-    // Check if user is logged in and has completed survey
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (session) {
-      // Check if user has completed questionnaire
-      const { data: questionnaireData } = await supabase
-        .from("questionnaire_responses")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
-      
-      if (questionnaireData) {
-        // User is logged in and has completed survey - go straight to game
-        navigate("/game");
-        return;
-      }
+  const handleStartSelling = () => {
+    if (user && hasCompletedQuestionnaire) {
+      navigate("/game");
+    } else {
+      navigate("/auth?intent=sell");
     }
-    
-    // Otherwise, go to auth page
-    navigate("/auth?intent=sell");
   };
 
   return (

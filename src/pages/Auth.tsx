@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -14,15 +15,14 @@ const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const intent = searchParams.get("intent");
+  const { user, isLoading: authLoading } = useAuth();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        const redirectPath = intent === "buy" ? "/buyer" : intent === "sell" ? "/game" : "/";
-        navigate(redirectPath);
-      }
-    });
-  }, [navigate, intent]);
+    if (!authLoading && user) {
+      const redirectPath = intent === "buy" ? "/buyer" : intent === "sell" ? "/game" : "/";
+      navigate(redirectPath);
+    }
+  }, [user, authLoading, navigate, intent]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();

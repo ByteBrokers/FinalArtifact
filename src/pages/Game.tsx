@@ -5,32 +5,28 @@ import { toast } from "sonner";
 import Questionnaire from "@/components/game/Questionnaire";
 import CharacterCustomization from "@/components/game/CharacterCustomization";
 import Game3D from "@/components/game/Game3D";
+import { useAuth } from "@/contexts/AuthContext";
 import type { QuestionnaireData, CharacterCustomizationData, GameStateData } from "@/types/game";
 
 type GamePhase = "questionnaire" | "character" | "game";
 
 const Game = () => {
   const [phase, setPhase] = useState<GamePhase>("questionnaire");
-  const [userId, setUserId] = useState<string | null>(null);
   const [questionnaireData, setQuestionnaireData] = useState<QuestionnaireData | null>(null);
   const [characterData, setCharacterData] = useState<CharacterCustomizationData | null>(null);
   const [gameState, setGameState] = useState<GameStateData | null>(null);
   const navigate = useNavigate();
+  const { user, isLoading, refreshQuestionnaireStatus } = useAuth();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
-      setUserId(session.user.id);
-      await loadExistingData(session.user.id);
-    };
-    checkAuth();
-  }, [navigate]);
+    if (!isLoading && !user) {
+      navigate("/auth");
+      return;
+    }
+    if (user) {
+      loadExistingData(user.id);
+    }
+  }, [user, isLoading, navigate]);
 
   const loadExistingData = async (uid: string) => {
     try {
@@ -62,14 +58,15 @@ const Game = () => {
   };
 
   const handleQuestionnaireComplete = async (data: QuestionnaireData) => {
-    if (!userId) return;
+    if (!user) return;
     try {
       const { error } = await supabase.from("questionnaire_responses").upsert({
-        user_id: userId,
+        user_id: user.id,
         ...data,
       });
       if (error) throw error;
       setQuestionnaireData(data);
+      await refreshQuestionnaireStatus();
       setPhase("character");
     } catch (error: any) {
       toast.error("Failed to save questionnaire data");
@@ -78,10 +75,10 @@ const Game = () => {
   };
 
   const handleCharacterComplete = async (data: CharacterCustomizationData) => {
-    if (!userId || !questionnaireData) return;
+    if (!user || !questionnaireData) return;
     try {
       const { error: charError } = await supabase.from("character_customization").upsert({
-        user_id: userId,
+        user_id: user.id,
         ...data,
       });
       if (charError) throw charError;
@@ -90,7 +87,7 @@ const Game = () => {
       const coins = Object.keys(dataTypes).length * 20 + 60;
 
       const { error: gameError } = await supabase.from("game_state").upsert({
-        user_id: userId,
+        user_id: user.id,
         coins,
         level: 1,
         exp: 0,
@@ -178,23 +175,19 @@ const Game = () => {
     navigate("/");
   };
 
-  // if (!userId) {
-  //   return (
-  //     <div className="min-h-screen bg-gradient-primary flex items-center justify-center">
-  //       <p className="text-white">Hi</p>
-  //     </div>
-  //   );
-  // }
+  if (isLoading || !user) {
+    return null;
+  }
 
   return (
     <>
       {phase === "questionnaire" && <Questionnaire onComplete={handleQuestionnaireComplete} />}
       {phase === "character" && questionnaireData && <CharacterCustomization onComplete={handleCharacterComplete} />}
-      {phase === "game" && characterData && gameState && userId && (
+      {phase === "game" && characterData && gameState && (
         <Game3D
           characterData={characterData}
           initialGameState={gameState}
-          userId={userId}
+          userId={user.id}
           onLogout={handleLogout}
           onGoHome={handleGoHome}
         />
