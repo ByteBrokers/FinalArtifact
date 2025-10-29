@@ -298,10 +298,19 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
 
       const texture = new THREE.CanvasTexture(canvas);
       const textMaterial = new THREE.MeshBasicMaterial({ map: texture });
-      const textBoard = new THREE.Mesh(boardGeometry, textMaterial);
-      textBoard.position.y = 8.5;
-      textBoard.position.z = 0.16;
-      group.add(textBoard);
+      
+      // Front side text
+      const textBoardFront = new THREE.Mesh(boardGeometry, textMaterial);
+      textBoardFront.position.y = 8.5;
+      textBoardFront.position.z = 0.16;
+      group.add(textBoardFront);
+
+      // Back side text (rotated 180 degrees)
+      const textBoardBack = new THREE.Mesh(boardGeometry, textMaterial);
+      textBoardBack.position.y = 8.5;
+      textBoardBack.position.z = -0.16;
+      textBoardBack.rotation.y = Math.PI;
+      group.add(textBoardBack);
 
       group.position.set(0, 0, 0);
       return group;
