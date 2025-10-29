@@ -298,7 +298,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
 
       const texture = new THREE.CanvasTexture(canvas);
       const textMaterial = new THREE.MeshBasicMaterial({ map: texture });
-      
+
       // Front side text
       const textBoardFront = new THREE.Mesh(boardGeometry, textMaterial);
       textBoardFront.position.y = 8.5;
@@ -326,7 +326,8 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     const buildings = createBuildings(scene);
     buildingsRef.current = buildings;
 
-    camera.position.set(0, 15, 20);
+    player.position.set(0, 0, 3);
+    camera.position.set(0, 15, 23);
     camera.lookAt(player.position);
 
     sceneRef.current = scene;
@@ -1174,13 +1175,10 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     }
 
     // Load completed surveys
-    const { data: surveys } = await supabase
-      .from("business_surveys")
-      .select("company_name")
-      .eq("user_id", userId);
-    
+    const { data: surveys } = await supabase.from("business_surveys").select("company_name").eq("user_id", userId);
+
     if (surveys) {
-      setCompletedSurveys(surveys.map(s => s.company_name));
+      setCompletedSurveys(surveys.map((s) => s.company_name));
     }
   };
 
@@ -1348,19 +1346,14 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
             setGameState((prev) => ({ ...prev, coins: newCoins }));
 
             // Save to database
-            await supabase
-              .from("game_state")
-              .update({ coins: newCoins })
-              .eq("user_id", userId);
+            await supabase.from("game_state").update({ coins: newCoins }).eq("user_id", userId);
 
             // Record survey completion
-            await supabase
-              .from("business_surveys")
-              .insert({
-                user_id: userId,
-                company_name: currentCompany.name,
-                earnings,
-              });
+            await supabase.from("business_surveys").insert({
+              user_id: userId,
+              company_name: currentCompany.name,
+              earnings,
+            });
 
             // Update completed surveys list
             setCompletedSurveys([...completedSurveys, currentCompany.name]);
