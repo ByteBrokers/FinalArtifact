@@ -15,6 +15,7 @@ const Game = () => {
   const [questionnaireData, setQuestionnaireData] = useState<QuestionnaireData | null>(null);
   const [characterData, setCharacterData] = useState<CharacterCustomizationData | null>(null);
   const [gameState, setGameState] = useState<GameStateData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -58,6 +59,8 @@ const Game = () => {
       }
     } catch (error) {
       console.error("Error loading data:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -178,7 +181,7 @@ const Game = () => {
     navigate("/");
   };
 
-  if (!userId) {
+  if (!userId || isLoading) {
     return (
       <div className="min-h-screen bg-gradient-primary flex items-center justify-center">
         <p className="text-white">Loading...</p>
