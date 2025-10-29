@@ -23,7 +23,7 @@ const GameUI = ({
   onUpdateInfo,
 }: GameUIProps) => {
   const [balanceExpanded, setBalanceExpanded] = useState(false);
-  const [controlsExpanded, setControlsExpanded] = useState(false);
+  const [controlsExpanded, setControlsExpanded] = useState(true);
 
   const coinsToNZD = (coins: number) => {
     return (coins / 50).toFixed(2);
@@ -49,7 +49,7 @@ const GameUI = ({
 
         {balanceExpanded && (
           <div className="mt-3 pt-3 border-t border-border">
-            {/* <div className="flex items-center justify-between text-xs mb-3">
+            <div className="flex items-center justify-between text-xs mb-3">
               <div className="text-center">
                 <div className="text-muted-foreground mb-1">Level</div>
                 <div className="text-sm font-semibold text-foreground">{gameState.level}</div>
@@ -59,7 +59,7 @@ const GameUI = ({
                 <div className="text-muted-foreground mb-1">XP</div>
                 <div className="text-sm font-semibold text-foreground">{gameState.exp}</div>
               </div>
-            </div> */}
+            </div>
 
             <div className="grid grid-cols-3 gap-1.5">
               <Button onClick={onGoHome} variant="outline" size="sm" className="h-auto w-full flex flex-col gap-1 py-2">
