@@ -178,13 +178,13 @@ const Game = () => {
     navigate("/");
   };
 
-  if (!userId) {
-    return (
-      <div className="min-h-screen bg-gradient-primary flex items-center justify-center">
-        <p className="text-white">Hi joe</p>
-      </div>
-    );
-  }
+  // if (!userId) {
+  //   return (
+  //     <div className="min-h-screen bg-gradient-primary flex items-center justify-center">
+  //       <p className="text-white">Hi joe</p>
+  //     </div>
+  //   );
+  // }
 
   return (
     <>
