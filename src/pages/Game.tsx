@@ -181,7 +181,7 @@ const Game = () => {
   // if (!userId) {
   //   return (
   //     <div className="min-h-screen bg-gradient-primary flex items-center justify-center">
-  //       <p className="text-white">Hi joe</p>
+  //       <p className="text-white">Hi</p>
   //     </div>
   //   );
   // }
