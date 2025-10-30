@@ -1348,6 +1348,14 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
             // Save to database
             await supabase.from("game_state").update({ coins: newCoins }).eq("user_id", userId);
 
+            // Record earnings in history
+            await supabase.from("earnings_history").insert({
+              user_id: userId,
+              amount: earnings,
+              data_type: "Survey Completion",
+              company_name: currentCompany.name,
+            });
+
             // Record survey completion
             await supabase.from("business_surveys").insert({
               user_id: userId,
