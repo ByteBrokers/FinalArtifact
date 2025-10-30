@@ -84,11 +84,10 @@ const Game = () => {
       if (charError) throw charError;
 
       const dataTypes = generateDataTypes(questionnaireData);
-      const coins = Object.keys(dataTypes).length * 20 + 60;
 
       const { error: gameError } = await supabase.from("game_state").upsert({
         user_id: user.id,
-        coins,
+        coins: 0,
         level: 1,
         exp: 0,
         data_types: dataTypes,
@@ -96,7 +95,7 @@ const Game = () => {
       if (gameError) throw gameError;
 
       setCharacterData(data);
-      setGameState({ coins, level: 1, exp: 0, data_types: dataTypes });
+      setGameState({ coins: 0, level: 1, exp: 0, data_types: dataTypes });
       setPhase("game");
     } catch (error: any) {
       toast.error("Failed to save character data");
