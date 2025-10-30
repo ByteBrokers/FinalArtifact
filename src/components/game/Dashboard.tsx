@@ -52,6 +52,7 @@ interface DashboardProps {
   onEditCharacter: () => void;
   onUpdateInfo: () => void;
   openWithdrawal?: boolean;
+  onRefreshGameState?: () => void;
 }
 
 interface EarningsData {
@@ -76,7 +77,7 @@ interface CurrentInventoryItem {
   potentialEarnings: number;
 }
 
-const Dashboard = ({ userId, characterData, onClose, onEditCharacter, onUpdateInfo, openWithdrawal }: DashboardProps) => {
+const Dashboard = ({ userId, characterData, onClose, onEditCharacter, onUpdateInfo, openWithdrawal, onRefreshGameState }: DashboardProps) => {
   const [totalEarnings, setTotalEarnings] = useState(0);
   const [monthlyEarnings, setMonthlyEarnings] = useState(0);
   const [daysSinceJoining, setDaysSinceJoining] = useState(0);
@@ -308,6 +309,11 @@ const Dashboard = ({ userId, characterData, onClose, onEditCharacter, onUpdateIn
       
       // Reload dashboard data to reflect new balance
       await loadDashboardData();
+      
+      // Refresh parent game state to update displayed balance
+      if (onRefreshGameState) {
+        onRefreshGameState();
+      }
     } catch (error) {
       console.error("Withdrawal error:", error);
       toast.error("Failed to process withdrawal");

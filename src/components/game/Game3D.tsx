@@ -1152,6 +1152,21 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
     }
   };
 
+  const loadGameState = async () => {
+    const { data: gameStateData } = await supabase
+      .from("game_state")
+      .select("*")
+      .eq("user_id", userId)
+      .single();
+
+    if (gameStateData) {
+      setGameState({
+        ...gameStateData,
+        data_types: gameStateData.data_types as any,
+      });
+    }
+  };
+
   const loadQuestionnaireData = async () => {
     const { data } = await supabase.from("questionnaire_responses").select("*").eq("user_id", userId).maybeSingle();
 
@@ -1390,6 +1405,7 @@ const Game3D = ({ characterData, initialGameState, userId, onLogout, onGoHome }:
             setShowQuestionnaireEditor(true);
           }}
           openWithdrawal={openWithdrawalOnDashboard}
+          onRefreshGameState={loadGameState}
         />
       )}
       {isEditingCharacter && (
