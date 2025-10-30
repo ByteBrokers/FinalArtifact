@@ -287,6 +287,20 @@ const Dashboard = ({ userId, characterData, onClose, onEditCharacter, onUpdateIn
           data_type: "Bank Transfer",
         });
 
+      // Update game_state to decrease coins
+      const { data: gameStateData } = await supabase
+        .from("game_state")
+        .select("coins")
+        .eq("user_id", userId)
+        .single();
+
+      if (gameStateData) {
+        await supabase
+          .from("game_state")
+          .update({ coins: Math.max(0, gameStateData.coins - withdrawnAmount) })
+          .eq("user_id", userId);
+      }
+
       toast.success(`Withdrawal request submitted! You will receive $${coinsToNZD(withdrawnAmount)} NZD to your account.`);
       setShowWithdrawalDialog(false);
       setWithdrawalAmount("");
